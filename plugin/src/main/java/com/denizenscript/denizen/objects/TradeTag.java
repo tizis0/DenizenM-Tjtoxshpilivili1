@@ -80,12 +80,7 @@ public class TradeTag implements ObjectTag, Adjustable {
 
     public static MerchantRecipe duplicateRecipe(ItemStack result, MerchantRecipe oldRecipe) {
         MerchantRecipe newRecipe;
-        if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
-            newRecipe = new MerchantRecipe(result, oldRecipe.getUses(), oldRecipe.getMaxUses(), oldRecipe.hasExperienceReward(), oldRecipe.getVillagerExperience(), oldRecipe.getPriceMultiplier(), oldRecipe.getDemand(), oldRecipe.getSpecialPrice());
-        }
-        else {
-            newRecipe = new MerchantRecipe(result, oldRecipe.getUses(), oldRecipe.getMaxUses(), oldRecipe.hasExperienceReward(), oldRecipe.getVillagerExperience(), oldRecipe.getPriceMultiplier());
-        }
+        newRecipe = new MerchantRecipe(result, oldRecipe.getUses(), oldRecipe.getMaxUses(), oldRecipe.hasExperienceReward(), oldRecipe.getVillagerExperience(), oldRecipe.getPriceMultiplier(), oldRecipe.getDemand(), oldRecipe.getSpecialPrice());
         newRecipe.setIngredients(oldRecipe.getIngredients());
         return newRecipe;
     }

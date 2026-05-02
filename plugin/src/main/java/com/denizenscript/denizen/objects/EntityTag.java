@@ -1260,9 +1260,6 @@ public class EntityTag implements ObjectTag, Adjustable, EntityFormObject, Flagg
         // Deprecated in favor of <@link tag EntityTag.type> on MC 1.20+, which returns entity type names as specified by Mojang (scripts using this may need an update when switching).
         // -->
         tagProcessor.registerTag(ElementTag.class, "entity_type", (attribute, object) -> {
-            if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_19)) {
-                return new ElementTag(object.getEntityType().getName(), true);
-            }
             BukkitImplDeprecations.oldSpigotNames.warn(attribute.context);
             return new ElementTag(switch (object.getEntityType().getName()) {
                 case "ITEM" -> "DROPPED_ITEM";

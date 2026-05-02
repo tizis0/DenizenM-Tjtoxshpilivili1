@@ -2665,6 +2665,7 @@ public class LocationTag extends org.bukkit.Location implements VectorObject, Ob
         // @description
         // Returns a list of entities within a radius, with an optional search parameter for the entity type.
         // Result list is sorted by closeness (1 = closest, 2 = next closest, ... last = farthest).
+        // 02.05.2026 Added new sub-tag <.unsorted> if the distance between mobs doesn't matter
         // -->
         tagProcessor.registerTag(ListTag.class, "find_entities", (attribute, object) -> {
             String matcher = attribute.hasParam() ? attribute.getParam() : null;
@@ -2672,18 +2673,46 @@ public class LocationTag extends org.bukkit.Location implements VectorObject, Ob
                 return null;
             }
             double radius = attribute.getDoubleContext(2);
-            attribute.fulfill(1);
-            ListTag found = new ListTag();
+            boolean unsorted = attribute.startsWith("unsorted", 3);
+            attribute.fulfill(unsorted ? 2 : 1);
             BoundingBox box = BoundingBox.of(object, radius, radius, radius);
+            class DistancePair implements Comparable<DistancePair> {
+                final EntityTag entity;
+                final double distanceSq;
+                DistancePair(EntityTag entity, double distanceSq) {
+                    this.entity = entity;
+                    this.distanceSq = distanceSq;
+                }
+
+                @Override
+                public int compareTo(DistancePair other) {
+                    return Double.compare(this.distanceSq, other.distanceSq);
+                }
+            }
+
+            List<DistancePair> pairs = new ArrayList<>();
             for (Entity entity : new WorldTag(object.getWorld()).getPossibleEntitiesForBoundaryForTag(box)) {
                 if (Utilities.checkLocationWithBoundingBox(object, entity, radius)) {
                     EntityTag current = new EntityTag(entity);
                     if (matcher == null || current.tryAdvancedMatcher(matcher, attribute.context)) {
-                        found.addObject(current.getDenizenObject());
+                        if (unsorted) {
+                            pairs.add(new DistancePair(current, 0));
+                        } else {
+                            pairs.add(new DistancePair(current, object.distanceSquared(entity.getLocation())));
+                        }
                     }
                 }
             }
-            found.objectForms.sort((ent1, ent2) -> object.compare(((EntityFormObject) ent1).getLocation(), ((EntityFormObject) ent2).getLocation()));
+
+            if (!unsorted) {
+                pairs.sort(null);
+            }
+
+            ListTag found = new ListTag();
+            for (DistancePair pair : pairs) {
+                found.addObject(pair.entity.getDenizenObject());
+            }
+
             return found;
         });
 

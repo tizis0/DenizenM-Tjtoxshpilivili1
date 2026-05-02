@@ -179,9 +179,7 @@ public class BiomeTag implements ObjectTag, Adjustable, FlaggableObject {
         // - narrate "The downfall type in plains biomes is: <biome[plains].downfall_type>!"
         // -->
         tagProcessor.registerTag(ElementTag.class, "downfall_type", (attribute, object) -> {
-            if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_19)) {
-                BukkitImplDeprecations.biomeGlobalDownfallType.warn(attribute.context);
-            }
+            BukkitImplDeprecations.biomeGlobalDownfallType.warn(attribute.context);
             return new ElementTag(object.biome.getDownfallType());
         });
 

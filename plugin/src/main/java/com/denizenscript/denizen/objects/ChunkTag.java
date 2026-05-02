@@ -927,13 +927,8 @@ public class ChunkTag implements ObjectTag, Adjustable, FlaggableObject {
         // - adjust <player.location.chunk> refresh_chunk_sections
         // -->
         if (mechanism.matches("refresh_chunk_sections")) {
-            if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
-                BukkitImplDeprecations.chunkRefreshSections.warn(mechanism.context);
-                getBukkitWorld().refreshChunk(chunkX, chunkZ);
-            }
-            else {
-                NMSHandler.chunkHelper.refreshChunkSections(getChunk());
-            }
+            BukkitImplDeprecations.chunkRefreshSections.warn(mechanism.context);
+            getBukkitWorld().refreshChunk(chunkX, chunkZ);
         }
 
         // <--[mechanism]

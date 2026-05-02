@@ -769,35 +769,32 @@ public class ItemTag implements ObjectTag, Adjustable, FlaggableObject {
             object.item.setType(material.getMaterial());
         });
 
-        if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_20)) {
-
-            // <--[tag]
-            // @attribute <ItemTag.map_to_image[<player>]>
-            // @returns ImageTag
-            // @description
-            // Returns an image of a filled map item's contents.
-            // Must specify a player for the map to render for, as if that player is holding the map.
-            // Note that this does not include cursors, as their rendering is entirely client-side.
-            // -->
-            tagProcessor.registerTag(ImageTag.class, PlayerTag.class, "map_to_image", (attribute, object, input) -> {
-                if (!(object.getItemMeta() instanceof MapMeta mapMeta)) {
-                    return null;
+        // <--[tag]
+        // @attribute <ItemTag.map_to_image[<player>]>
+        // @returns ImageTag
+        // @description
+        // Returns an image of a filled map item's contents.
+        // Must specify a player for the map to render for, as if that player is holding the map.
+        // Note that this does not include cursors, as their rendering is entirely client-side.
+        // -->
+        tagProcessor.registerTag(ImageTag.class, PlayerTag.class, "map_to_image", (attribute, object, input) -> {
+            if (!(object.getItemMeta() instanceof MapMeta mapMeta)) {
+                return null;
+            }
+            MapView mapView = mapMeta.getMapView();
+            if (mapView == null) {
+                attribute.echoError("Invalid map item: must have contents.");
+                return null;
+            }
+            byte[] data = NMSHandler.itemHelper.renderMap(mapView, input.getPlayerEntity());
+            BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+            for (int x = 0; x < 128; x++) {
+                for (int y = 0; y < 128; y++) {
+                    image.setRGB(x, y, MapPalette.getColor(data[y * 128 + x]).getRGB());
                 }
-                MapView mapView = mapMeta.getMapView();
-                if (mapView == null) {
-                    attribute.echoError("Invalid map item: must have contents.");
-                    return null;
-                }
-                byte[] data = NMSHandler.itemHelper.renderMap(mapView, input.getPlayerEntity());
-                BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-                for (int x = 0; x < 128; x++) {
-                    for (int y = 0; y < 128; y++) {
-                        image.setRGB(x, y, MapPalette.getColor(data[y * 128 + x]).getRGB());
-                    }
-                }
-                return new ImageTag(image);
-            });
-        }
+            }
+            return new ImageTag(image);
+        });
     }
 
     public String formattedName() {

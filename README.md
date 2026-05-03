@@ -3,7 +3,7 @@ The Denizen Scripting Language - Paper Impl (Unofficial version!)
 
 An implementation of the Denizen Scripting Language for Paper servers, with strong Citizens interlinks to emphasize the power of using Denizen with NPCs!
 
-**Version 1.3.2M**: Compatible with Paper 26.1.1 and 1.21.11!
+**Version 1.3.2M**: Compatible with Paper 26.1.2 and 1.21.11!
 
 > [!IMPORTANT]
 > Support for versions below **1.21.11** has been officially dropped.
@@ -40,6 +40,9 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
 
 ## 🧹 Optimization & Cleanup
 * **Core Optimization:** Implementation of custom optimizations across several internal classes.
+* **Tags Modification:**
+    * Added new sub-tag `.unsorted` to tag `.find_entities[<...>].within[<...>]` to bypass distance-based sorting. Use this for better performance when the order of entities in the list is not required.
+    * Optimized the `.distance` tag by replacing `Math.pow` with direct multiplication. This reduces computational overhead and results in faster distance calculations across the script.
 * **Removals:**
     * The `.scriptname` tag has been removed from all objects.
     * `Denizen ASAP Strong warning` has been fully removed.

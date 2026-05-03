@@ -152,7 +152,7 @@ public class Handler extends NMSHandler {
 
     @Override
     public boolean isExactServerVersionMatch() {
-        return Denizen.supportsPaper ? SharedConstants.getCurrentVersion().id().equals("26.1.1") : CraftMagicNumbers.INSTANCE.getMappingsVersion().equals("e8ece90188c951d866bd2fffc52c803e");
+        return Denizen.supportsPaper ? SharedConstants.getCurrentVersion().id().equals("26.1.2") : CraftMagicNumbers.INSTANCE.getMappingsVersion().equals("e8ece90188c951d866bd2fffc52c803e");
     }
 
     @Override
@@ -161,9 +161,8 @@ public class Handler extends NMSHandler {
             Method getTpsMethod = Server.class.getMethod("getTPS");
             return (double[]) getTpsMethod.invoke(Bukkit.getServer());
         } catch (Throwable e) {
-            Debug.echoError("Something went wrong when trying to get the TPS method.");
             Debug.echoError(e);
-            return new double[]{0.0, 0.0, 0.0};
+            return null;
         }
     }
 

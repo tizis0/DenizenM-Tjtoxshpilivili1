@@ -3808,6 +3808,32 @@ public class PlayerTag implements ObjectTag, Adjustable, EntityFormObject, Flagg
 
         // <--[mechanism]
         // @object PlayerTag
+        // @name edit_sign
+        // @input LocationTag
+        // @description
+        // Allows the player to edit an existing sign. To create a sign, see <@link command Sign>.
+        // Give no input to make a fake edit interface.
+        // -->
+        if (mechanism.matches("edit_sign")) {
+            if (mechanism.hasValue() && mechanism.requireObject(LocationTag.class)) {
+                BlockState state = mechanism.valueAsType(LocationTag.class).getBlockState();
+                if (!(state instanceof Sign)) {
+                    mechanism.echoError("Invalid location specified: must be a sign.");
+                    return;
+                }
+                if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
+                    NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), state.getLocation());
+                    return;
+                }
+                getPlayerEntity().openSign((Sign) state);
+            }
+            else {
+                NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), null);
+            }
+        }
+
+        // <--[mechanism]
+        // @object PlayerTag
         // @name quietly_discover_recipe
         // @input ListTag
         // @description
@@ -3850,42 +3876,6 @@ public class PlayerTag implements ObjectTag, Adjustable, EntityFormObject, Flagg
                 keys.add(Utilities.parseNamespacedKey(key));
             }
             getPlayerEntity().undiscoverRecipes(keys);
-        }
-
-        // <--[mechanism]
-        // @object PlayerTag
-        // @name edit_sign
-        // @input LocationTag
-        // @description
-        // Allows the player to edit an existing sign. To create a sign, see <@link command Sign>.
-        // Give no input to make a fake edit interface.
-        // -->
-        if (mechanism.matches("edit_sign")) {
-            if (mechanism.hasValue() && LocationTag.matches(mechanism.getValue().asString())) {
-                BlockState state = mechanism.valueAsType(LocationTag.class).getBlockState();
-                if (!(state instanceof Sign)) {
-                    mechanism.echoError("Invalid location specified: must be a sign.");
-                    return;
-                }
-                if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
-                    NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), state.getLocation());
-                    return;
-                }
-                getPlayerEntity().openSign((Sign) state);
-            } else {
-                Player player = getPlayerEntity();
-                String[] lines = new String[] {"", "", "", ""};
-                if (mechanism.hasValue()) {
-                    ListTag inputLines = ListTag.getListFor(mechanism.getValue(), mechanism.context);
-                    if (inputLines != null) {
-                        for (int i = 0; i < Math.min(4, inputLines.size()); i++) {
-                            lines[i] = inputLines.get(i);
-                        }
-                    }
-                }
-
-                NMSHandler.packetHelper.showFakeSignEditor(player, player.getLocation(), lines);
-            }
         }
 
         // <--[mechanism]

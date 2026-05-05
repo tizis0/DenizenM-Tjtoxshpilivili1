@@ -211,48 +211,6 @@ public class PacketHelperImpl implements PacketHelper {
     }
 
     @Override
-    public void showFakeSignEditor(Player player, Location location, String[] text) {
-        NetworkInterceptHelper.enable();
-        Sign sign = null;
-        BlockPos toOpen = null;
-        Location foundLoc = null;
-        for (int i = 0; i < 8; i++) {
-            Location toCheck = player.getLocation();
-            toCheck.setY(toCheck.getY() - i);
-            if (toCheck.getBlock().getState() instanceof Sign foundSign) {
-                sign = foundSign;
-                foundLoc = toCheck;
-            }
-            else {
-                sign = null;
-                toOpen = CraftLocation.toBlockPosition(toCheck);
-                foundLoc = toCheck;
-                break;
-            }
-        }
-
-        if (sign != null) {
-            toOpen = CraftLocation.toBlockPosition(sign.getLocation());
-            SignSide front = sign.getSide(Side.FRONT);
-            for (int line = 0; line < 4; line++) {
-                String lineText = (text != null && text.length > line && text[line] != null) ? text[line] : "";
-                front.setLine(line, lineText);
-            }
-            player.sendBlockUpdate(sign.getLocation(), sign);
-        } else {
-            Location fakeSignLoc = new Location(player.getWorld(), toOpen.getX(), toOpen.getY(), toOpen.getZ());
-            player.sendBlockChange(fakeSignLoc, Material.OAK_WALL_SIGN.createBlockData());
-            if (text != null) {
-                player.sendSignChange(fakeSignLoc, text);
-            }
-        }
-
-        DenizenNetworkManagerImpl.getNetworkManager(player).packetListener.fakeSignExpected = toOpen;
-        ServerPlayer pl = ((CraftPlayer) player).getHandle();
-        pl.connection.send(new ClientboundOpenSignEditorPacket(toOpen, true));
-    }
-
-    @Override
     public void forceSpectate(Player player, Entity entity) {
         send(player, new ClientboundSetCameraPacket(((CraftEntity) entity).getHandle()));
     }

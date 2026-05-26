@@ -20,10 +20,6 @@
         <module>paper</module>
         <module>v26_1</module>
         <module>v1_21</module>
-        <module>v1_20</module>
-        <module>v1_19</module>
-        <module>v1_18</module>
-        <module>v1_17</module>
         <module>dist</module>
     </modules>
 

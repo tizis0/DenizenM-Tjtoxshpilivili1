@@ -126,6 +126,10 @@ public class PaperAPITools {
         entity.teleport(loc, cause);
     }
 
+    public void teleportAsync(Entity entity, Location loc, PlayerTeleportEvent.TeleportCause cause, List<TeleportCommand.EntityState> entityTeleportFlags, List<TeleportCommand.Relative> relativeTeleportFlags) {
+        entity.teleport(loc, cause); // fallback
+    }
+
     public void registerBrewingRecipe(String keyName, ItemStack result, String input, String ingredient, ItemScriptContainer itemScriptContainer) {
         throw new UnsupportedOperationException();
     }

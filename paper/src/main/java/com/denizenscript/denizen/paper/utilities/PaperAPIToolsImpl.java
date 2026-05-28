@@ -179,6 +179,26 @@ public class PaperAPIToolsImpl extends PaperAPITools {
         entity.teleport(loc, cause, teleportFlags.toArray(new TeleportFlag[0]));
     }
 
+    @Override
+    public void teleportAsync(Entity entity, Location loc, PlayerTeleportEvent.TeleportCause cause, List<TeleportCommand.EntityState> entityTeleportFlags, List<TeleportCommand.Relative> relativeTeleportFlags) {
+        List<TeleportFlag> teleportFlags = new ArrayList<>();
+        if (entityTeleportFlags != null) {
+            for (TeleportCommand.EntityState entityTeleportFlag : entityTeleportFlags) {
+                teleportFlags.add(TeleportFlag.EntityState.values()[entityTeleportFlag.ordinal()]);
+            }
+        }
+        if (relativeTeleportFlags != null) {
+            for (TeleportCommand.Relative relativeTeleportFlag : relativeTeleportFlags) {
+                teleportFlags.add(new ElementTag(relativeTeleportFlag.name()).asEnum(TeleportFlag.Relative.class));
+            }
+        }
+        entity.teleportAsync(loc, cause, teleportFlags.toArray(new TeleportFlag[0])).thenAccept(success -> {
+            if (!success) {
+                Debug.echoError("Async teleport failed for entity '" + entity.getUniqueId() + "' to location " + loc + ".");
+            }
+        });
+    }
+
     record BrewingRecipeMatchers(String inputMatcher, String ingredientMatcher) {}
     public static final Map<NamespacedKey, BrewingRecipeMatchers> potionMixes = new HashMap<>();
 

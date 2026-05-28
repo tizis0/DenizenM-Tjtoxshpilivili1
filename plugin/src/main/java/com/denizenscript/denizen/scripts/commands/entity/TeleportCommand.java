@@ -30,7 +30,7 @@ public class TeleportCommand extends AbstractCommand {
 
     public TeleportCommand() {
         setName("teleport");
-        setSyntax("teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch)");
+        setSyntax("teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch) (async)");
         setRequiredArguments(1, 9);
         isProcedural = false;
         autoCompile();
@@ -111,6 +111,7 @@ public class TeleportCommand extends AbstractCommand {
                                    @ArgPrefixed @ArgName("cause") @ArgDefaultText("plugin") PlayerTeleportEvent.TeleportCause cause,
                                    @ArgName("entity_options") @ArgPrefixed @ArgDefaultNull @ArgSubType(EntityState.class) List<EntityState> entityOptions,
                                    @ArgName("relative_axes") @ArgPrefixed @ArgDefaultNull @ArgSubType(Relative.class) List<Relative> relativeAxes,
+                                   @ArgName("async") boolean async,
                                    @ArgName("relative") boolean relative,
                                    @ArgName("offthread_repeat") @ArgDefaultNull @ArgPrefixed ElementTag offthreadRepeats,
                                    @ArgName("offthread_yaw") boolean offthreadYaw,
@@ -198,6 +199,10 @@ public class TeleportCommand extends AbstractCommand {
                         Debug.echoError(ex);
                     }
                 });
+                continue;
+            }
+            if (async) {
+                PaperAPITools.instance.teleportAsync(entity.getBukkitEntity(), location, cause, entityOptions, relativeAxes);
                 continue;
             }
             if (entityOptions != null || relativeAxes != null) {

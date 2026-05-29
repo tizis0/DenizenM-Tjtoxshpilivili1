@@ -127,7 +127,7 @@ public class PaperAPITools {
     }
 
     public void teleportAsync(Entity entity, Location loc, PlayerTeleportEvent.TeleportCause cause, List<TeleportCommand.EntityState> entityTeleportFlags, List<TeleportCommand.Relative> relativeTeleportFlags) {
-        entity.teleport(loc, cause); // fallback
+        entity.teleport(loc, cause);
     }
 
     public void registerBrewingRecipe(String keyName, ItemStack result, String input, String ingredient, ItemScriptContainer itemScriptContainer) {
@@ -356,5 +356,9 @@ public class PaperAPITools {
 
     public void addResourcePack(Player player, String url, String hash, boolean forced, String prompt, UUID uuid) {
         player.addResourcePack(uuid, url, ResourcePackCommand.parseHash(hash), prompt, forced);
+    }
+
+    public void spawnParticle(Player player, Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, Object data, boolean forced) {
+        player.spawnParticle(particle, location, count, offsetX, offsetY, offsetZ, extra, data);
     }
 }

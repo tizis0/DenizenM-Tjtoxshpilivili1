@@ -6,6 +6,7 @@ import com.denizenscript.denizen.objects.*;
 import com.denizenscript.denizen.objects.properties.bukkit.BukkitColorExtensions;
 import com.denizenscript.denizen.utilities.BukkitImplDeprecations;
 import com.denizenscript.denizen.utilities.LegacyParticleNaming;
+import com.denizenscript.denizen.utilities.PaperAPITools;
 import com.denizenscript.denizen.utilities.Utilities;
 import com.denizenscript.denizencore.exceptions.InvalidArgumentsException;
 import com.denizenscript.denizencore.objects.Argument;
@@ -35,8 +36,8 @@ public class PlayEffectCommand extends AbstractCommand {
 
     public PlayEffectCommand() {
         setName("playeffect");
-        setSyntax("playeffect [effect:<name>] [at:<location>|...] (data:<#.#>) (special_data:<map>) (visibility:<#.#>) (quantity:<#>) (offset:<#.#>,<#.#>,<#.#>) (targets:<player>|...) (velocity:<vector>)");
-        setRequiredArguments(2, 8);
+        setSyntax("playeffect [effect:<name>] [at:<location>|...] (data:<#.#>) (special_data:<map>) (visibility:<#.#>) (quantity:<#>) (offset:<#.#>,<#.#>,<#.#>) (targets:<player>|...) (velocity:<vector>) (forced)");
+        setRequiredArguments(2, 9);
         isProcedural = false;
     }
 
@@ -54,9 +55,9 @@ public class PlayEffectCommand extends AbstractCommand {
 
     // <--[command]
     // @Name PlayEffect
-    // @Syntax playeffect [effect:<name>] [at:<location>|...] (data:<#.#>) (special_data:<map>) (visibility:<#.#>) (quantity:<#>) (offset:<#.#>,<#.#>,<#.#>) (targets:<player>|...) (velocity:<vector>)
+    // @Syntax playeffect [effect:<name>] [at:<location>|...] (data:<#.#>) (special_data:<map>) (visibility:<#.#>) (quantity:<#>) (offset:<#.#>,<#.#>,<#.#>) (targets:<player>|...) (velocity:<vector>) (forced)
     // @Required 2
-    // @Maximum 8
+    // @Maximum 9
     // @Short Plays a visible or audible effect at the location.
     // @Synonyms Particle
     // @Group world
@@ -68,6 +69,7 @@ public class PlayEffectCommand extends AbstractCommand {
     // Specifying a visibility value changes the sight radius of the effect. For example if visibility is 15; Targeted players won't see it unless they are 15 blocks or closer.
     // You can add a quantity value that allow multiple of the same effect played at the same time. If an offset is set, each particle will be played at a different location in the offset area.
     // Everyone will see the particle effects unless a target has been specified.
+    // The 'forced' argument will force the particle to render regardless of client particle settings.
     // See <@link language Particle Effects> for a list of valid effect names.
     //
     // Version change note: The original PlayEffect command raised all location inputs 1 block-height upward to avoid effects playing underground when played at eg a player's location.
@@ -229,6 +231,10 @@ public class PlayEffectCommand extends AbstractCommand {
                     && arg.matchesPrefix("targets", "target", "t")) {
                 scriptEntry.addObject("targets", arg.asType(ListTag.class).filter(PlayerTag.class, scriptEntry));
             }
+            else if (!scriptEntry.hasObject("forced")
+                    && arg.matches("forced")) {
+                scriptEntry.addObject("forced", new ElementTag(true));
+            }
             else {
                 arg.reportUnhandled();
             }
@@ -262,9 +268,11 @@ public class PlayEffectCommand extends AbstractCommand {
         LocationTag offset = scriptEntry.getObjectTag("offset");
         ElementTag special_data = scriptEntry.getElement("special_data");
         LocationTag velocity = scriptEntry.getObjectTag("velocity");
+        ElementTag forced = scriptEntry.getElement("forced");
+        boolean isForced = forced != null && forced.asBoolean();
         if (scriptEntry.dbCallShouldDebug()) {
             Debug.report(scriptEntry, getName(), (effect != null ? db("effect", effect.name()) : particleEffect != null ? db("special effect", particleEffect.name()) : iconcrack),
-                    db("locations", locations), db("targets", targets), radius, data, quantity, offset, special_data, velocity, (should_offset ? db("note", "Location will be offset 1 block-height upward (see documentation)") : ""));
+                    db("locations", locations), db("targets", targets), radius, data, quantity, offset, special_data, velocity, forced, (should_offset ? db("note", "Location will be offset 1 block-height upward (see documentation)") : ""));
         }
         for (LocationTag location : locations) {
             if (should_offset) {
@@ -493,14 +501,14 @@ public class PlayEffectCommand extends AbstractCommand {
                 int quantityInt = quantity.asInt();
                 for (Player player : players) {
                     if (velocity == null) {
-                        player.spawnParticle(particleEffect, location, quantityInt, offset.getX(), offset.getY(), offset.getZ(), data.asDouble(), dataObject);
+                        PaperAPITools.instance.spawnParticle(player, particleEffect, location, quantityInt, offset.getX(), offset.getY(), offset.getZ(), data.asDouble(), dataObject, isForced);
                     }
                     else {
                         for (int i = 0; i < quantityInt; i++) {
                             LocationTag singleLocation = location.clone().add((random.nextDouble() - 0.5) * offset.getX(),
                                     (random.nextDouble() - 0.5) * offset.getY(),
                                     (random.nextDouble() - 0.5) * offset.getZ());
-                            player.spawnParticle(particleEffect, singleLocation, 0, velocity.getX(), velocity.getY(), velocity.getZ(), 1, dataObject);
+                            PaperAPITools.instance.spawnParticle(player, particleEffect, singleLocation, 0, velocity.getX(), velocity.getY(), velocity.getZ(), 1, dataObject, isForced);
                         }
                     }
                 }
@@ -527,7 +535,7 @@ public class PlayEffectCommand extends AbstractCommand {
                     ItemStack itemStack = iconcrack.getItemStack();
                     Particle particle = Particle.valueOf("ITEM_CRACK");
                     for (Player player : players) {
-                        player.spawnParticle(particle, location, quantity.asInt(), offset.getX(), offset.getY(), offset.getZ(), data.asFloat(), itemStack);
+                        PaperAPITools.instance.spawnParticle(player, particle, location, quantity.asInt(), offset.getX(), offset.getY(), offset.getZ(), data.asFloat(), itemStack, isForced);
                     }
                 }
             }

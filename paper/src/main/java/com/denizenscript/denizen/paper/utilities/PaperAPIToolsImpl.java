@@ -161,9 +161,6 @@ public class PaperAPIToolsImpl extends PaperAPITools {
 
     @Override
     public void teleport(Entity entity, Location loc, PlayerTeleportEvent.TeleportCause cause, List<TeleportCommand.EntityState> entityTeleportFlags, List<TeleportCommand.Relative> relativeTeleportFlags) {
-        if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_19)) {
-            super.teleport(entity, loc, cause, null, null);
-        }
         List<TeleportFlag> teleportFlags = new ArrayList<>();
         if (entityTeleportFlags != null) {
             for (TeleportCommand.EntityState entityTeleportFlag : entityTeleportFlags) {
@@ -204,9 +201,6 @@ public class PaperAPIToolsImpl extends PaperAPITools {
 
     @Override
     public void registerBrewingRecipe(String keyName, ItemStack result, String input, String ingredient, ItemScriptContainer itemScriptContainer) {
-        if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
-            throw new UnsupportedOperationException();
-        }
         TagContext context = DenizenCore.implementation.getTagContext(itemScriptContainer);
         RecipeChoice inputChoice = parseBrewingRecipeChoice(itemScriptContainer, input, context);
         if (inputChoice == null) {
@@ -231,7 +225,7 @@ public class PaperAPIToolsImpl extends PaperAPITools {
     }
 
     public static RecipeChoice parseBrewingRecipeChoice(ItemScriptContainer container, String choice, TagContext context) {
-        if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_20) && choice.startsWith("matcher:")) {
+        if (choice.startsWith("matcher:")) {
             String matcher = choice.substring("matcher:".length());
             return PotionMix.createPredicateChoice(item -> new ItemTag(item).tryAdvancedMatcher(matcher, context));
         }
@@ -283,10 +277,6 @@ public class PaperAPIToolsImpl extends PaperAPITools {
 
     @Override
     public void setSkin(Player player, String name) {
-        if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_18)) {
-            NMSHandler.instance.getProfileEditor().setPlayerSkin(player, name);
-            return;
-        }
         // Note: this API is present on all supported versions, but currently used for 1.19+ only
         PlayerProfile skinProfile = Bukkit.createProfile(name);
         boolean isOwnName = CoreUtilities.equalsIgnoreCase(player.getName(), name);
@@ -336,19 +326,6 @@ public class PaperAPIToolsImpl extends PaperAPITools {
 
     @Override
     public <T extends Entity> T spawnEntity(Location location, Class<T> type, Consumer<T> configure, CreatureSpawnEvent.SpawnReason reason) {
-        if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_19)) {
-            // Takes the deprecated bukkit consumer on older versions
-            if (WORLD_SPAWN_BUKKIT_CONSUMER == null) {
-                WORLD_SPAWN_BUKKIT_CONSUMER = ReflectionHelper.getMethodHandle(RegionAccessor.class, "spawn", Location.class, Class.class, Consumer.class, CreatureSpawnEvent.SpawnReason.class);
-            }
-            try {
-                return (T) WORLD_SPAWN_BUKKIT_CONSUMER.invoke(location.getWorld(), location, type, configure, reason);
-            }
-            catch (Throwable e) {
-                Debug.echoError(e);
-                return null;
-            }
-        }
         return location.getWorld().spawn(location, type, configure, reason);
     }
 
@@ -492,6 +469,19 @@ public class PaperAPIToolsImpl extends PaperAPITools {
     @Override
     public void sendActionBar(Player player, String text) {
         player.sendActionBar(FormattedTextHelper.parse(text, NamedTextColor.WHITE));
+    }
+
+    @Override
+    public void spawnParticle(Player player, Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, Object data, boolean forced) {
+        particle.builder()
+                .location(location)
+                .count(count)
+                .offset(offsetX, offsetY, offsetZ)
+                .extra(extra)
+                .data(data)
+                .force(forced)
+                .receivers(player)
+                .spawn();
     }
 
     @Override

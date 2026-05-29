@@ -8,7 +8,7 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
 > [!IMPORTANT]
 > Support for versions below **1.21.11** has been officially dropped.
 
-## ✨ New Features & API Improvements
+## ✨ New Features
 * **Events:** Added support for the Paper-specific event `on player unchecked sign edits`.
 * **Resource Pack:** Fully overhauled the logic for the `resourcepack` command to support adding multiple resource packs.
     * Added a new `add` argument to the `resourcepack` command to send additional resource packs to a player.
@@ -33,13 +33,25 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
     * Added `.shadow_color`, `.shadow_gradient` and `.dual_gradient` tags to `ElementTag`.
 * **Internal Migration:** Fully migrated to **Paper Components** for improved performance and modern API compatibility.
 
+## 👾 Commands
+* **Teleport**:
+  * An `async` option has been added that teleports the player to unloaded chunks without causing server lag; sometimes there is a slight delay in execution. Details: https://docs.papermc.io/paper/dev/entity-teleport/
+  * Added `~waitable` tag support for teleports utilizing the async parameter. This allows scripts to precisely track and wait until the asynchronous teleportation process is fully completed.
+  * Usage examples:
+    * Async teleport - `teleport <player> <player.location.random_offset[99999,0,99999]> async`
+    * Waitable teleport - `~teleport <player> <player.location.random_offset[99999,0,99999]> async`
+* **Playeffect**:
+  * Migrated to Paper's modern `ParticleBuilder` API, fixing a vanilla limitation where particles wouldn't render beyond 32 blocks from the player.
+  * Added automatic handling for the `forced` parameter. Previously, even if you specified a high visibility radius (e.g., visibility:100) for a particle spawned 50 blocks away, it wouldn't display. Forcing the particle now ensures it correctly renders at extended distances.
+  * Usage example - `playeffect effect:END_ROD quantity:100 <player.location.random_offset[50,0,50]> visibility:100 forced`
+
 ## 🧪 Items & Mechanics
 * **Attributes:**
     * Added new `.rarity_color` tag for items, returns ColorTag.
        * Usage example - `<player.item_in_hand.rarity_color>`
 * **Custom Model Data:**
-  * Updated `custom_model_data` mechanism and property, returns a MapTag of `floats`, `strings`, `flags (booleans)`, and `colors`.
-  * Now accepts a `MapTag` containing `Lists` of `floats`, `strings`, `flags (booleans)`, and `colors` (RGB) for advanced item model selection, while fully retaining backward compatibility for single-number inputs.
+  * Updated `custom_model_data` mechanism and property, returns a MapTag of `floats`, `strings`, `flags` (booleans), and `colors`.
+  * Now accepts a `MapTag` containing `Lists` of `floats`, `strings`, `flags` (booleans), and `colors` (RGB) for advanced item model selection, while fully retaining backward compatibility for single-number inputs.
   * Usage examples:
     * Backward compatibility - `inventory adjust slot:hand custom_model_data:1000`
     * New format - `inventory adjust slot:hand custom_model_data:<map[floats=<list[1000]>;flags=<list[...]>;strings=<list[foo:bar]>;colors=<list[<color[127,0,0]>]>]>`
@@ -48,7 +60,7 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
 ## 🧹 Optimization & Cleanup
 * **Core Optimization:** Implementation of custom optimizations across several internal classes.
 * **Tags Modification:**
-    * Added new sub-tag `.unsorted` to tag `.find_entities[<...>].within[<...>]` to bypass distance-based sorting. Use this for better performance when the order of entities in the list is not required.
+    * Added new sub-tag `.unsorted` to tag `.find_entities[<#.#>].within[<#.#>]` to bypass distance-based sorting. Use this for better performance when the order of entities in the list is not required.
     * Optimized the `.distance` tag by replacing `Math.pow` with direct multiplication. This reduces computational overhead and results in faster distance calculations across the script.
 * **Removals:**
     * The `.scriptname` tag has been removed from all objects.

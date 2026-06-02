@@ -14,9 +14,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class PlayerChangesUnchekedSignScriptEvent extends BukkitScriptEvent implements Listener {
+public class PlayerChangesUncheckedSignScriptEvent extends BukkitScriptEvent implements Listener {
 
-    public PlayerChangesUnchekedSignScriptEvent() {
+    public PlayerChangesUncheckedSignScriptEvent() {
         registerCouldMatcher("player unchecked sign edits");
     }
 

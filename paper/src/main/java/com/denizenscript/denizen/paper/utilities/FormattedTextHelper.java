@@ -1022,9 +1022,31 @@ public class FormattedTextHelper {
         int length = text.length();
         if (length == 0) return "";
 
+        String addedFormat = "";
+        int charIndex = 0;
+
         for (int i = 0; i < length; i++) {
             char c = text.charAt(i);
-            float ratio = length == 1 ? 0 : (float) i / (length - 1);
+            if (c == LEGACY_SECTION && i + 1 < text.length()) {
+                char c2 = text.charAt(i + 1);
+                if (PaperElementExtensions.FORMAT_CODES_MATCHER.isMatch(c2)) {
+                    addedFormat += String.valueOf(LEGACY_SECTION) + c2;
+                }
+                else if (c2 == '[') {
+                    int endBracket = text.indexOf(']', i);
+                    if (endBracket != -1) {
+                        addedFormat += text.substring(i, endBracket + 1);
+                        i = endBracket - 1;
+                    }
+                }
+                else {
+                    addedFormat = "";
+                }
+                i++;
+                continue;
+            }
+
+            float ratio = length == 1 ? 0 : (float) charIndex / (length - 1);
             int rC = (int) (fromC.red + ratio * (toC.red - fromC.red));
             int gC = (int) (fromC.green + ratio * (toC.green - fromC.green));
             int bC = (int) (fromC.blue + ratio * (toC.blue - fromC.blue));
@@ -1034,9 +1056,11 @@ public class FormattedTextHelper {
             int bS = (int) (fromS.blue + ratio * (toS.blue - fromS.blue));
             int aS = (int) (fromS.alpha + ratio * (toS.alpha - fromS.alpha));
             String hexShadow = String.format("#%02x%02x%02x%02x", rS, gS, bS, aS);
-            result.append(FormattedTextHelper.LEGACY_SECTION).append("[color=").append(hexColor).append("]")
-                    .append(FormattedTextHelper.LEGACY_SECTION).append("[shadow=").append(hexShadow).append("]")
+            result.append(LEGACY_SECTION).append("[color=").append(hexColor).append("]")
+                    .append(LEGACY_SECTION).append("[shadow=").append(hexShadow).append("]")
+                    .append(addedFormat)
                     .append(c);
+            charIndex++;
         }
         return result.toString();
     }
@@ -1053,19 +1077,44 @@ public class FormattedTextHelper {
         int toR = to.red;
         int toG = to.green;
         int toB = to.blue;
+
+        String addedFormat = "";
+        int charIndex = 0;
+
         for (int i = 0; i < length; i++) {
             char c = text.charAt(i);
-            float ratio = length == 1 ? 0 : (float) i / (length - 1);
+            if (c == LEGACY_SECTION && i + 1 < text.length()) {
+                char c2 = text.charAt(i + 1);
+                if (PaperElementExtensions.FORMAT_CODES_MATCHER.isMatch(c2)) {
+                    addedFormat += String.valueOf(LEGACY_SECTION) + c2;
+                }
+                else if (c2 == '[') {
+                    int endBracket = text.indexOf(']', i);
+                    if (endBracket != -1) {
+                        addedFormat += text.substring(i, endBracket + 1);
+                        i = endBracket - 1;
+                    }
+                }
+                else {
+                    addedFormat = "";
+                }
+                i++;
+                continue;
+            }
+
+            float ratio = length == 1 ? 0 : (float) charIndex / (length - 1);
             int r = (int) (fromR + ratio * (toR - fromR));
             int g = (int) (fromG + ratio * (toG - fromG));
             int b = (int) (fromB + ratio * (toB - fromB));
             int a = (int) (fromA + ratio * (toA - fromA));
             String hexRgba = String.format("#%02x%02x%02x%02x", r, g, b, a);
-            result.append(FormattedTextHelper.LEGACY_SECTION)
+            result.append(LEGACY_SECTION)
                     .append("[shadow=")
                     .append(hexRgba)
                     .append("]")
+                    .append(addedFormat)
                     .append(c);
+            charIndex++;
         }
         return result.toString();
     }

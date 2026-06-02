@@ -88,7 +88,7 @@ public class Denizen extends JavaPlugin {
     public static String versionTag = null;
     private boolean startedSuccessful = false;
 
-    public static boolean supportsPaper = false;
+    public static boolean supportsPaper = true;
 
     public CommandManager commandManager;
 
@@ -132,17 +132,6 @@ public class Denizen extends JavaPlugin {
         }
         String javaVersion = System.getProperty("java.version");
         Debug.log("Running on java version: " + javaVersion);
-        try {
-            if (Class.forName("com.destroystokyo.paper.PaperConfig") != null) {
-                supportsPaper = true;
-            }
-        }
-        catch (ClassNotFoundException ex) {
-            // Ignore.
-        }
-        catch (Throwable ex) {
-            Debug.echoError(ex);
-        }
         if (!NMSHandler.initialize(this)) {
             getLogger().warning("-------------------------------------");
             getLogger().warning("This build of Denizen is not compatible with this Spigot version! Deactivating Denizen!");
@@ -152,7 +141,7 @@ public class Denizen extends JavaPlugin {
             return;
         }
         if (!NMSHandler.instance.isExactServerVersionMatch()) {
-            String serverSoftware = supportsPaper ? "Paper" : "Spigot";
+            String serverSoftware = "Paper";
             getLogger().warning("""
                     \n-------------------------------------
                     This build of Denizen was built for a different Minecraft version! This may potentially cause issues.

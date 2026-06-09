@@ -8,6 +8,13 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
 > [!IMPORTANT]
 > Support for versions below **1.21.11** has been officially dropped.
 
+> ⚡ **Full Compatibility:** Works flawlessly with **[Denizen Utilities](https://modrinth.com/plugin/denizen-utilities)** and **[Denizen Reflect](https://modrinth.com/plugin/denizen-reflect)** right after installation.
+
+## 💎 Extension Highlights
+* **Next-Gen Support:** Fully updated extension for VS Code by `Humususus`.
+* **All-in-One:** Includes all the latest changes and community-requested tweaks.
+* **Source & Guide:** Check it out on 🔗 **[GitHub: refined-denizenScript](https://github.com/Humususus/refined-denizenScript)**
+
 ## ✨ New Features
 * **Events:** Added support for the Paper-specific event `on player unchecked sign edits`.
 * **Resource Pack:** Fully overhauled the logic for the `resourcepack` command to support adding multiple resource packs.
@@ -89,7 +96,6 @@ An implementation of the Denizen Scripting Language for Paper servers, with stro
 - **Depenizen (Other plugin support)**: https://github.com/DenizenScript/Depenizen
 - **dDiscordBot (Adds a Discord bot to Denizen)**: https://github.com/DenizenScript/dDiscordBot
 - **DenizenCore (Our core, needed for building)**: https://github.com/DenizenScript/Denizen-Core
-- **DenizenVSCode (extension for writing Denizen scripts in VS Code)**: https://github.com/DenizenScript/DenizenVSCode
 
 ### Building
 

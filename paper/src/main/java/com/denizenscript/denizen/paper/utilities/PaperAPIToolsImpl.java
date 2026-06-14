@@ -196,7 +196,7 @@ public class PaperAPIToolsImpl extends PaperAPITools {
         }
         entity.teleportAsync(loc, cause, teleportFlags.toArray(new TeleportFlag[0])).thenAccept(success -> {
             if (!success) {
-                Debug.echoError("Async teleport failed for entity '" + entity.getUniqueId() + "' to location " + loc + ".");
+                Debug.echoError("Async teleport failed for entity 'e@" + entity.getUniqueId() + "' to location <LG>" + loc + "<W>.");
             }
             if (callback != null) {
                 DenizenCore.runOnMainThread(() -> callback.accept(success));

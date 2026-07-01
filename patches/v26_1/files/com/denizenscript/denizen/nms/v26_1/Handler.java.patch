@@ -1,0 +1,113 @@
+--- a/com/denizenscript/denizen/nms/v26_1/Handler.java
++++ b/com/denizenscript/denizen/nms/v26_1/Handler.java
+@@ -16,7 +_,6 @@
+ import com.denizenscript.denizen.objects.LocationTag;
+ import com.denizenscript.denizen.objects.MaterialTag;
+ import com.denizenscript.denizen.objects.properties.item.ItemRawNBT;
+-import com.denizenscript.denizen.utilities.FormattedTextHelper;
+ import com.denizenscript.denizen.utilities.PaperAPITools;
+ import com.denizenscript.denizencore.objects.ObjectTag;
+ import com.denizenscript.denizencore.objects.core.ElementTag;
+@@ -33,8 +_,6 @@
+ import com.mojang.authlib.properties.Property;
+ import com.mojang.serialization.DynamicOps;
+ import net.kyori.adventure.nbt.CompoundBinaryTag;
+-import net.md_5.bungee.api.ChatColor;
+-import net.md_5.bungee.api.chat.BaseComponent;
+ import net.minecraft.SharedConstants;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+@@ -61,10 +_,7 @@
+ import net.minecraft.world.level.storage.TagValueOutput;
+ import net.minecraft.world.level.storage.ValueInput;
+ import net.minecraft.world.level.storage.ValueOutput;
+-import org.bukkit.Bukkit;
+-import org.bukkit.Location;
+-import org.bukkit.NamespacedKey;
+-import org.bukkit.World;
++import org.bukkit.*;
+ import org.bukkit.block.Block;
+ import org.bukkit.boss.BossBar;
+ import org.bukkit.craftbukkit.CraftRegistry;
+@@ -93,6 +_,7 @@
+ 
+ import java.lang.invoke.MethodHandle;
+ import java.lang.reflect.Field;
++import java.lang.reflect.Method;
+ import java.nio.charset.StandardCharsets;
+ import java.util.ArrayList;
+ import java.util.List;
+@@ -126,7 +_,7 @@
+         enchantmentHelper = new EnchantmentHelperImpl();
+ 
+         registerConversion(ItemTag.class, ItemStack.class, item -> CraftItemStack.asNMSCopy(item.getItemStack()));
+-        registerConversion(ElementTag.class, Component.class, element -> componentToNMS(FormattedTextHelper.parse(element.asString(), ChatColor.WHITE)));
++        registerConversion(ElementTag.class, Component.class, element -> parseNMSComponent(element.asString(), PaperAPITools.BaseColor.WHITE));
+         registerConversion(MaterialTag.class, BlockState.class, material -> ((CraftBlockData) material.getModernData()).getState());
+         registerConversion(LocationTag.class, Rotations.class, location -> new Rotations((float) location.getX(), (float) location.getY(), (float) location.getZ()));
+         registerConversion(LocationTag.class, BlockPos.class, Handler::toBlockPos);
+@@ -167,7 +_,13 @@
+ 
+     @Override
+     public double[] getRecentTps() {
+-        return ((CraftServer) Bukkit.getServer()).getServer().recentTps;
++        try {
++            Method getTpsMethod = Server.class.getMethod("getTPS");
++            return (double[]) getTpsMethod.invoke(Bukkit.getServer());
++        } catch (Throwable e) {
++            Debug.echoError(e);
++            return null;
++        }
+     }
+ 
+     @Override
+@@ -257,7 +_,7 @@
+     public void setInventoryTitle(InventoryView view, String title) {
+         AbstractContainerMenu menu = ((CraftInventoryView) view).getHandle();
+         try {
+-            AbstractContainerMenu_title_SETTER.invoke(menu, componentToNMS(FormattedTextHelper.parse(title, ChatColor.DARK_GRAY)));
++            AbstractContainerMenu_title_SETTER.invoke(menu, parseNMSComponent(title, PaperAPITools.BaseColor.DARK_GRAY));
+         }
+         catch (Throwable ex) {
+             Debug.echoError(ex);
+@@ -376,20 +_,6 @@
+         }
+     }
+ 
+-    public static BaseComponent[] componentToSpigot(Component nms) {
+-        if (nms == null) {
+-            return null;
+-        }
+-        return FormattedTextHelper.parseJson(CraftChatMessage.toJSON(nms));
+-    }
+-
+-    public static Component componentToNMS(BaseComponent[] spigot) {
+-        if (spigot == null) {
+-            return null;
+-        }
+-        return CraftChatMessage.fromJSONOrNull(FormattedTextHelper.componentToJson(spigot));
+-    }
+-
+     public static final MethodHandle TAG_VALUE_OUTPUT_CONSTRUCTOR = ReflectionHelper.getConstructor(TagValueOutput.class, ProblemReporter.class, DynamicOps.class, CompoundTag.class);
+ 
+     public static CompoundTag useValueOutput(Consumer<ValueOutput> handler) {
+@@ -431,5 +_,19 @@
+     @Override
+     public String updateLegacyName(Class<?> type, String legacyName) {
+         return FieldRename.rename(ApiVersion.FIELD_NAME_PARITY, DebugInternals.getFullClassNameOpti(type).replace('.', '/'), legacyName);
++    }
++
++    public static String stringifyNMSComponent(Component nms) {
++        if (nms == null) {
++            return null;
++        }
++        return PaperAPITools.instance.parseJsonToText(CraftChatMessage.toJSON(nms));
++    }
++
++    public static Component parseNMSComponent(String formattedText, PaperAPITools.BaseColor baseColor) {
++        if (formattedText == null) {
++            return null;
++        }
++        return CraftChatMessage.fromJSON(PaperAPITools.instance.parseTextToJson(formattedText, baseColor));
+     }
+ }

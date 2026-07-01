@@ -1,0 +1,144 @@
+--- a/com/denizenscript/denizen/objects/LocationTag.java
++++ b/com/denizenscript/denizen/objects/LocationTag.java
+@@ -2665,6 +_,7 @@
+         // @description
+         // Returns a list of entities within a radius, with an optional search parameter for the entity type.
+         // Result list is sorted by closeness (1 = closest, 2 = next closest, ... last = farthest).
++        // 02.05.2026 Added new sub-tag <.unsorted> if the distance between mobs doesn't matter
+         // -->
+         tagProcessor.registerTag(ListTag.class, "find_entities", (attribute, object) -> {
+             String matcher = attribute.hasParam() ? attribute.getParam() : null;
+@@ -2672,18 +_,46 @@
+                 return null;
+             }
+             double radius = attribute.getDoubleContext(2);
+-            attribute.fulfill(1);
+-            ListTag found = new ListTag();
++            boolean unsorted = attribute.startsWith("unsorted", 3);
++            attribute.fulfill(unsorted ? 2 : 1);
+             BoundingBox box = BoundingBox.of(object, radius, radius, radius);
++            class DistancePair implements Comparable<DistancePair> {
++                final EntityTag entity;
++                final double distanceSq;
++                DistancePair(EntityTag entity, double distanceSq) {
++                    this.entity = entity;
++                    this.distanceSq = distanceSq;
++                }
++
++                @Override
++                public int compareTo(DistancePair other) {
++                    return Double.compare(this.distanceSq, other.distanceSq);
++                }
++            }
++
++            List<DistancePair> pairs = new ArrayList<>();
+             for (Entity entity : new WorldTag(object.getWorld()).getPossibleEntitiesForBoundaryForTag(box)) {
+                 if (Utilities.checkLocationWithBoundingBox(object, entity, radius)) {
+                     EntityTag current = new EntityTag(entity);
+                     if (matcher == null || current.tryAdvancedMatcher(matcher, attribute.context)) {
+-                        found.addObject(current.getDenizenObject());
++                        if (unsorted) {
++                            pairs.add(new DistancePair(current, 0));
++                        } else {
++                            pairs.add(new DistancePair(current, object.distanceSquared(entity.getLocation())));
++                        }
+                     }
+                 }
+             }
+-            found.objectForms.sort((ent1, ent2) -> object.compare(((EntityFormObject) ent1).getLocation(), ((EntityFormObject) ent2).getLocation()));
++
++            if (!unsorted) {
++                pairs.sort(null);
++            }
++
++            ListTag found = new ListTag();
++            for (DistancePair pair : pairs) {
++                found.addObject(pair.entity.getDenizenObject());
++            }
++
+             return found;
+         });
+ 
+@@ -3360,60 +_,40 @@
+ 
+                 // <--[tag]
+                 // @attribute <LocationTag.distance[<location>].horizontal>
+-                // @returns ElementTag(Decimal)
+-                // @group math
+-                // @description
+-                // Returns the horizontal distance between 2 locations.
+-                // -->
++                // ...
+                 if (attribute.startsWith("horizontal", 2)) {
+-
+-                    // <--[tag]
+-                    // @attribute <LocationTag.distance[<location>].horizontal.multiworld>
+-                    // @returns ElementTag(Decimal)
+-                    // @group math
+-                    // @description
+-                    // Returns the horizontal distance between 2 multiworld locations.
+-                    // -->
+                     if (attribute.startsWith("multiworld", 3)) {
+                         attribute.fulfill(2);
+-                        return new ElementTag(Math.sqrt(Math.pow(object.getX() - toLocation.getX(), 2) +
+-                                Math.pow(object.getZ() - toLocation.getZ(), 2)));
++                        double dx = object.getX() - toLocation.getX();
++                        double dz = object.getZ() - toLocation.getZ();
++                        return new ElementTag(Math.sqrt(dx * dx + dz * dz));
+                     }
+                     attribute.fulfill(1);
+-                    if (object.getWorldName().equalsIgnoreCase(toLocation.getWorldName())) {
+-                        return new ElementTag(Math.sqrt(Math.pow(object.getX() - toLocation.getX(), 2) +
+-                                Math.pow(object.getZ() - toLocation.getZ(), 2)));
++                    if (object.getWorldName() != null && object.getWorldName().equalsIgnoreCase(toLocation.getWorldName())) {
++                        double dx = object.getX() - toLocation.getX();
++                        double dz = object.getZ() - toLocation.getZ();
++                        return new ElementTag(Math.sqrt(dx * dx + dz * dz));
+                     }
+                 }
+ 
+                 // <--[tag]
+                 // @attribute <LocationTag.distance[<location>].vertical>
+-                // @returns ElementTag(Decimal)
+-                // @group math
+-                // @description
+-                // Returns the vertical distance between 2 locations.
+-                // -->
++                // ...
+                 else if (attribute.startsWith("vertical", 2)) {
+-
+-                    // <--[tag]
+-                    // @attribute <LocationTag.distance[<location>].vertical.multiworld>
+-                    // @returns ElementTag(Decimal)
+-                    // @group math
+-                    // @description
+-                    // Returns the vertical distance between 2 multiworld locations.
+-                    // -->
+                     if (attribute.startsWith("multiworld", 3)) {
+                         attribute.fulfill(2);
+                         return new ElementTag(Math.abs(object.getY() - toLocation.getY()));
+                     }
+                     attribute.fulfill(1);
+-                    if (object.getWorldName().equalsIgnoreCase(toLocation.getWorldName())) {
++                    if (object.getWorldName() != null && object.getWorldName().equalsIgnoreCase(toLocation.getWorldName())) {
+                         return new ElementTag(Math.abs(object.getY() - toLocation.getY()));
+                     }
+                 }
+-                if (object.getWorldName() == null) {
++
++                if (object.getWorldName() == null || toLocation.getWorldName() == null) {
+                     return new ElementTag(object.toVector().distance(toLocation.toVector()));
+                 }
++
+                 if (!object.getWorldName().equalsIgnoreCase(toLocation.getWorldName())) {
+                     attribute.echoError("Can't measure distance between two different worlds!");
+                     return null;
+@@ -4637,7 +_,7 @@
+         });
+     }
+ 
+-    public static ObjectTagProcessor<LocationTag> tagProcessor = new ObjectTagProcessor<>();
++    public static final ObjectTagProcessor<LocationTag> tagProcessor = new ObjectTagProcessor<>();
+ 
+     @Override
+     public ObjectTag getObjectAttribute(Attribute attribute) {

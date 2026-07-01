@@ -1,0 +1,116 @@
+--- a/com/denizenscript/denizen/paper/properties/PaperPlayerExtensions.java
++++ b/com/denizenscript/denizen/paper/properties/PaperPlayerExtensions.java
+@@ -1,7 +_,5 @@
+ package com.denizenscript.denizen.paper.properties;
+ 
+-import com.denizenscript.denizen.nms.NMSHandler;
+-import com.denizenscript.denizen.nms.NMSVersion;
+ import com.denizenscript.denizen.objects.ItemTag;
+ import com.denizenscript.denizen.objects.PlayerTag;
+ import com.denizenscript.denizencore.objects.core.ElementTag;
+@@ -57,10 +_,8 @@
+         PlayerTag.registerOnlineOnlyTag(MapTag.class, "client_options", (attribute, object) -> {
+             MapTag map = new MapTag();
+             Player player = object.getPlayerEntity();
+-            if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_19)) {
+-                map.putObject("allow_server_listings", new ElementTag(player.getClientOption(ClientOption.ALLOW_SERVER_LISTINGS)));
+-                map.putObject("text_filtering_enabled", new ElementTag(player.getClientOption(ClientOption.TEXT_FILTERING_ENABLED)));
+-            }
++            map.putObject("allow_server_listings", new ElementTag(player.getClientOption(ClientOption.ALLOW_SERVER_LISTINGS)));
++            map.putObject("text_filtering_enabled", new ElementTag(player.getClientOption(ClientOption.TEXT_FILTERING_ENABLED)));
+             map.putObject("chat_colors_enabled", new ElementTag(player.getClientOption(ClientOption.CHAT_COLORS_ENABLED)));
+             map.putObject("chat_visibility", new ElementTag(player.getClientOption(ClientOption.CHAT_VISIBILITY)));
+             map.putObject("locale", new ElementTag(player.getClientOption(ClientOption.LOCALE)));
+@@ -149,9 +_,6 @@
+             }
+         });
+ 
+-        // <--[mechanism]
+-        // @object PlayerTag
+-        // @name view_distance
+         // @input ElementTag(Number)
+         // @Plugin Paper
+         // @group paper
+@@ -175,65 +_,22 @@
+             }
+         });
+ 
+-        if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_19)) {
+-
+-            // <--[tag]
+-            // @attribute <PlayerTag.flying_fall_damage>
+-            // @returns ElementTag(Boolean)
+-            // @mechanism PlayerTag.flying_fall_damage
+-            // @group paper
+-            // @Plugin Paper
+-            // @description
+-            // Returns whether the player will take fall damage while <@link tag PlayerTag.can_fly> is true.
+-            // -->
+-            PlayerTag.registerOnlineOnlyTag(ElementTag.class, "flying_fall_damage", (attribute, object) -> {
+-                return new ElementTag(object.getPlayerEntity().hasFlyingFallDamage().toBooleanOrElse(false));
+-            });
+-
+-            // <--[mechanism]
+-            // @object PlayerTag
+-            // @name add_tab_completions
+-            // @input ListTag
+-            // @Plugin Paper
+-            // @group paper
+-            // @description
+-            // Adds custom tab completions that will be suggested to the player when typing in chat.
+-            // Tab completions added by this mechanism can be removed using <@link mechanism PlayerTag.remove_tab_completions>.
+-            // -->
+-            PlayerTag.registerOnlineOnlyMechanism("add_tab_completions", ListTag.class, (object, mechanism, input) -> {
+-                object.getPlayerEntity().addAdditionalChatCompletions(input);
+-            });
+-
+-            // <--[mechanism]
+-            // @object PlayerTag
+-            // @name remove_tab_completions
+-            // @input ListTag
+-            // @Plugin Paper
+-            // @group paper
+-            // @description
+-            // Removes custom tab completions added by <@link mechanism PlayerTag.add_tab_completions>.
+-            // -->
+-            PlayerTag.registerOnlineOnlyMechanism("remove_tab_completions", ListTag.class, (object, mechanism, input) -> {
+-                object.getPlayerEntity().removeAdditionalChatCompletions(input);
+-            });
+-
+-            // <--[mechanism]
+-            // @object PlayerTag
+-            // @name flying_fall_damage
+-            // @input ElementTag(Boolean)
+-            // @Plugin Paper
+-            // @group paper
+-            // @description
+-            // Sets whether the player will take fall damage while <@link mechanism PlayerTag.can_fly> is true.
+-            // @tags
+-            // <PlayerTag.flying_fall_damage>
+-            // <PlayerTag.can_fly>
+-            // -->
+-            PlayerTag.registerOnlineOnlyMechanism("flying_fall_damage", ElementTag.class, (object, mechanism, input) -> {
+-                if (mechanism.requireBoolean()) {
+-                    object.getPlayerEntity().setFlyingFallDamage(TriState.byBoolean(input.asBoolean()));
+-                }
+-            });
+-        }
++        PlayerTag.registerOnlineOnlyTag(ElementTag.class, "flying_fall_damage", (attribute, object) -> {
++            return new ElementTag(object.getPlayerEntity().hasFlyingFallDamage().toBooleanOrElse(false));
++        });
++
++        PlayerTag.registerOnlineOnlyMechanism("add_tab_completions", ListTag.class, (object, mechanism, input) -> {
++            object.getPlayerEntity().addAdditionalChatCompletions(input);
++        });
++
++        PlayerTag.registerOnlineOnlyMechanism("remove_tab_completions", ListTag.class, (object, mechanism, input) -> {
++            object.getPlayerEntity().removeAdditionalChatCompletions(input);
++        });
++
++        PlayerTag.registerOnlineOnlyMechanism("flying_fall_damage", ElementTag.class, (object, mechanism, input) -> {
++            if (mechanism.requireBoolean()) {
++                object.getPlayerEntity().setFlyingFallDamage(TriState.byBoolean(input.asBoolean()));
++            }
++        });
+     }
+ }

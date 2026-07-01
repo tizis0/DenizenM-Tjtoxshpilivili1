@@ -1,0 +1,73 @@
+--- a/com/denizenscript/denizen/objects/ChunkTag.java
++++ b/com/denizenscript/denizen/objects/ChunkTag.java
+@@ -1,13 +_,14 @@
+ package com.denizenscript.denizen.objects;
+ 
+-import com.denizenscript.denizen.nms.NMSHandler;
+ import com.denizenscript.denizen.nms.NMSVersion;
+ import com.denizenscript.denizen.utilities.BukkitImplDeprecations;
++import com.denizenscript.denizencore.utilities.debugging.Debug;
+ import com.denizenscript.denizen.utilities.flags.DataPersistenceFlagTracker;
+ import com.denizenscript.denizen.utilities.flags.LocationFlagSearchHelper;
+ import com.denizenscript.denizencore.flags.AbstractFlagTracker;
+ import com.denizenscript.denizencore.flags.FlaggableObject;
+ import com.denizenscript.denizencore.objects.*;
++import com.denizenscript.denizen.nms.NMSHandler;
+ import com.denizenscript.denizencore.objects.core.DurationTag;
+ import com.denizenscript.denizencore.objects.core.ElementTag;
+ import com.denizenscript.denizencore.objects.core.ListTag;
+@@ -15,7 +_,6 @@
+ import com.denizenscript.denizencore.tags.ObjectTagProcessor;
+ import com.denizenscript.denizencore.tags.TagContext;
+ import com.denizenscript.denizencore.utilities.CoreUtilities;
+-import com.denizenscript.denizencore.utilities.debugging.Debug;
+ import org.bukkit.Chunk;
+ import org.bukkit.ChunkSnapshot;
+ import org.bukkit.Location;
+@@ -26,8 +_,7 @@
+ import org.bukkit.entity.Player;
+ import org.bukkit.plugin.Plugin;
+ 
+-import java.util.ArrayList;
+-import java.util.List;
++import java.util.*;
+ 
+ public class ChunkTag implements ObjectTag, Adjustable, FlaggableObject {
+ 
+@@ -893,18 +_,13 @@
+         // @deprecated functionality was removed from Spigot and Paper as of MC 1.21.
+         // @input None
+         // @description
+-        // Deprecated on MC 1.21+.
+         // Causes the chunk to be entirely deleted and reformed from the world's seed.
++        // At time of writing this method only works as expected on Paper, and will error on Spigot.
+         // @example
+         // - adjust <player.location.chunk> regenerate
+         // -->
+         if (mechanism.matches("regenerate")) {
+-            if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_20)) {
+-                getBukkitWorld().regenerateChunk(getX(), getZ());
+-            }
+-            else {
+-                BukkitImplDeprecations.chunkRegeneration.warn(mechanism.context);
+-            }
++            BukkitImplDeprecations.chunkRegeneration.warn(mechanism.context);
+         }
+ 
+         // <--[mechanism]
+@@ -934,13 +_,8 @@
+         // - adjust <player.location.chunk> refresh_chunk_sections
+         // -->
+         if (mechanism.matches("refresh_chunk_sections")) {
+-            if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
+-                BukkitImplDeprecations.chunkRefreshSections.warn(mechanism.context);
+-                getBukkitWorld().refreshChunk(chunkX, chunkZ);
+-            }
+-            else {
+-                NMSHandler.chunkHelper.refreshChunkSections(getChunk());
+-            }
++            BukkitImplDeprecations.chunkRefreshSections.warn(mechanism.context);
++            getBukkitWorld().refreshChunk(chunkX, chunkZ);
+         }
+ 
+         // <--[mechanism]

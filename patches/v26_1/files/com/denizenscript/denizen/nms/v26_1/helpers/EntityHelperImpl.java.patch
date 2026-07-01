@@ -1,0 +1,110 @@
+--- a/com/denizenscript/denizen/nms/v26_1/helpers/EntityHelperImpl.java
++++ b/com/denizenscript/denizen/nms/v26_1/helpers/EntityHelperImpl.java
+@@ -7,6 +_,7 @@
+ import com.denizenscript.denizen.nms.v26_1.impl.network.handlers.DenizenNetworkManagerImpl;
+ import com.denizenscript.denizen.objects.EntityTag;
+ import com.denizenscript.denizen.objects.properties.entity.EntityState;
++import com.denizenscript.denizen.utilities.PaperAPITools;
+ import com.denizenscript.denizen.utilities.Utilities;
+ import com.denizenscript.denizen.utilities.packets.NetworkInterceptHelper;
+ import com.denizenscript.denizencore.objects.ObjectTag;
+@@ -17,10 +_,12 @@
+ import com.denizenscript.denizencore.utilities.text.StringHolder;
+ import io.netty.buffer.Unpooled;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
++import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+ import net.kyori.adventure.nbt.CompoundBinaryTag;
+ import net.minecraft.commands.arguments.EntityAnchorArgument;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.network.FriendlyByteBuf;
++import net.minecraft.network.chat.Component;
+ import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
+ import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
+ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+@@ -70,10 +_,12 @@
+ import org.bukkit.block.data.BlockData;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.block.CraftBlock;
+ import org.bukkit.craftbukkit.block.CraftCreatureSpawner;
+ import org.bukkit.craftbukkit.block.data.CraftBlockData;
+ import org.bukkit.craftbukkit.entity.*;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.util.CraftChatMessage;
+ import org.bukkit.entity.*;
+ import org.bukkit.event.entity.EntityDamageEvent;
+ import org.bukkit.inventory.EquipmentSlot;
+@@ -607,7 +_,7 @@
+             case ENTITY_ATTACK -> sources.mobAttack(nmsSource instanceof net.minecraft.world.entity.LivingEntity nmsLivingEntity ? nmsLivingEntity : null);
+             case ENTITY_SWEEP_ATTACK -> src != sources.generic() ? src.sweep() : src;
+             case PROJECTILE -> sources.thrown(nmsSource, nmsSource != null && nmsSource.getBukkitEntity() instanceof Projectile projectile
+-                        && projectile.getShooter() instanceof CraftEntity shooter ? shooter.getHandle() : null);
++                    && projectile.getShooter() instanceof CraftEntity shooter ? shooter.getHandle() : null);
+             case SUFFOCATION -> sources.inWall();
+             case FALL -> sources.fall();
+             case FIRE -> sources.inFire();
+@@ -768,10 +_,19 @@
+ 
+     public static Int2ObjectMap<SynchedEntityData.DataItem<Object>> getDataItems(Entity entity) {
+         try {
+-            return (Int2ObjectMap<SynchedEntityData.DataItem<Object>>) SynchedEntityData_itemsById.get(((CraftEntity) entity).getHandle().getEntityData());
++            SynchedEntityData.DataItem<Object>[] itemsArray = (SynchedEntityData.DataItem<Object>[]) SynchedEntityData_itemsById.get(((CraftEntity) entity).getHandle().getEntityData());
++            Int2ObjectMap<SynchedEntityData.DataItem<Object>> map = new Int2ObjectOpenHashMap<>();
++            if (itemsArray != null) {
++                for (SynchedEntityData.DataItem<Object> item : itemsArray) {
++                    if (item != null) {
++                        map.put(item.getAccessor().id(), item);
++                    }
++                }
++            }
++            return map;
+         }
+         catch (IllegalAccessException e) {
+-            throw new RuntimeException(e); // Stop the code here to avoid NPEs down the road
++            throw new RuntimeException(e);
+         }
+     }
+ 
+@@ -788,7 +_,41 @@
+                 Debug.echoError("Invalid internal data id '" + id + "': couldn't be matched to any internal data for entity of type '" + entity.getType() + "'.");
+                 return;
+             }
+-            Object converted = ReflectionSetCommand.convertObjectTypeFor(dataItem.getValue().getClass(), entry.getValue());
++
++            Object converted = null;
++            Class<?> expectedType = dataItem.getValue() != null ? dataItem.getValue().getClass() : Object.class;
++            String typeName = expectedType.getName();
++
++            try {
++                if (typeName.equals("io.papermc.paper.adventure.AdventureComponent")) {
++                    Object kyoriComponent = PaperAPITools.instance.parseToKyori(entry.getValue().toString());
++                    if (kyoriComponent != null) {
++                        Class<?> advCompClass = Class.forName("io.papermc.paper.adventure.AdventureComponent");
++                        Class<?> kyoriCompClass = Class.forName("net.kyori.adventure.text.Component");
++                        converted = advCompClass.getConstructor(kyoriCompClass).newInstance(kyoriComponent);
++                    }
++                }
++                else if (Component.class.isAssignableFrom(expectedType)) {
++                    String json = PaperAPITools.instance.parseTextToAdventureJson(entry.getValue().toString());
++                    if (json != null) {
++                        converted = CraftChatMessage.fromJSON(json);
++                    }
++                }
++
++                else if (expectedType == Optional.class && (entry.getKey().low.equals("custom_name") || entry.getKey().low.equals("text"))) {
++                    String json = PaperAPITools.instance.parseTextToAdventureJson(entry.getValue().toString());
++                    if (json != null) {
++                        Component nmsComponent = CraftChatMessage.fromJSON(json);
++                        converted = Optional.ofNullable(nmsComponent);
++                    }
++                }
++                else {
++                    converted = ReflectionSetCommand.convertObjectTypeFor(expectedType, entry.getValue());
++                }
++            } catch (Throwable ex) {
++                Debug.echoError("Failed to parse fakeinternaldata for '" + entry.getKey() + "': " + ex.getMessage());
++            }
++
+             if (converted != null) {
+                 processConverted.accept(dataItem, converted);
+             }

@@ -1,0 +1,117 @@
+--- a/com/denizenscript/denizen/Denizen.java
++++ b/com/denizenscript/denizen/Denizen.java
+@@ -51,8 +_,6 @@
+ import com.denizenscript.denizencore.utilities.CoreConfiguration;
+ import com.denizenscript.denizencore.utilities.CoreUtilities;
+ import com.denizenscript.denizencore.utilities.debugging.Debug;
+-import com.denizenscript.denizencore.utilities.debugging.DebugInternals;
+-import com.denizenscript.denizencore.utilities.debugging.StrongWarning;
+ import com.denizenscript.denizencore.utilities.text.ConfigUpdater;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -90,7 +_,7 @@
+     public static String versionTag = null;
+     private boolean startedSuccessful = false;
+ 
+-    public static boolean supportsPaper = false;
++    public static boolean supportsPaper = true;
+ 
+     public CommandManager commandManager;
+ 
+@@ -114,7 +_,6 @@
+         instance = this;
+         try {
+             versionTag = this.getDescription().getVersion();
+-
+             CoreUtilities.noDebugContext = new BukkitTagContext(null, null, null, false, null);
+             CoreUtilities.noDebugContext.showErrors = () -> false;
+             CoreUtilities.basicContext = new BukkitTagContext(null, null, null, true, null);
+@@ -132,43 +_,8 @@
+         if (!PlayerFlagHandler.dataFolder.exists()) {
+             PlayerFlagHandler.dataFolder.mkdir();
+         }
+-        DebugInternals.alternateTrimLogic = FormattedTextHelper::bukkitSafeDebugTrimming;
+         String javaVersion = System.getProperty("java.version");
+         Debug.log("Running on java version: " + javaVersion);
+-        if (javaVersion.startsWith("8") || javaVersion.startsWith("1.8") || javaVersion.startsWith("9") || javaVersion.startsWith("1.9")
+-                || javaVersion.startsWith("10") || javaVersion.startsWith("1.10") || javaVersion.startsWith("11")
+-                || javaVersion.startsWith("12") || javaVersion.startsWith("13") || javaVersion.startsWith("14") || javaVersion.startsWith("15")) {
+-            Debug.log("Running on outdated Java version somehow. Denizen requires Java 16+ or newer to function.");
+-        }
+-        else if (javaVersion.startsWith("16")) {
+-            Debug.log("Running on fully supported Java 16.");
+-        }
+-        else if (javaVersion.startsWith("17")) {
+-            Debug.log("Running on fully supported Java 17.");
+-        }
+-        else if (javaVersion.startsWith("18") || javaVersion.startsWith("19")) {
+-            getLogger().warning("Running unreliable Java version. modern Minecraft versions are built for Java 25, 21, or 17. Other Java versions are not guaranteed to function properly.");
+-        }
+-        else if (javaVersion.startsWith("21")) {
+-            Debug.log("Running on fully supported Java 21.");
+-        }
+-        else if (javaVersion.startsWith("25")) {
+-            Debug.log("Running on fully supported Java 25.");
+-        }
+-        else {
+-            Debug.log("Running on unrecognized (future?) Java version. May or may not work.");
+-        }
+-        try {
+-            if (Class.forName("com.destroystokyo.paper.PaperConfig") != null) {
+-                supportsPaper = true;
+-            }
+-        }
+-        catch (ClassNotFoundException ex) {
+-            // Ignore.
+-        }
+-        catch (Throwable ex) {
+-            Debug.echoError(ex);
+-        }
+         if (!NMSHandler.initialize(this)) {
+             getLogger().warning("-------------------------------------");
+             getLogger().warning("This build of Denizen is not compatible with this Spigot version! Deactivating Denizen!");
+@@ -178,7 +_,7 @@
+             return;
+         }
+         if (!NMSHandler.instance.isExactServerVersionMatch()) {
+-            String serverSoftware = supportsPaper ? "Paper" : "Spigot";
++            String serverSoftware = "Paper";
+             getLogger().warning("""
+                     \n-------------------------------------
+                     This build of Denizen was built for a different Minecraft version! This may potentially cause issues.
+@@ -456,25 +_,6 @@
+                 PlayerFlagHandler.cleanCache();
+             }
+         }.runTaskTimer(this, 100, 20 * 60);
+-        new BukkitRunnable() {
+-            @Override
+-            public void run() {
+-                if (!StrongWarning.recentWarnings.isEmpty()) {
+-                    StringBuilder warnText = new StringBuilder();
+-                    warnText.append(ChatColor.YELLOW).append("[Denizen] ").append(ChatColor.RED).append("Recent strong system warnings, scripters need to address ASAP (check earlier console logs for details):");
+-                    for (StrongWarning warning : StrongWarning.recentWarnings.keySet()) {
+-                        warnText.append("\n- ").append(warning.message);
+-                    }
+-                    StrongWarning.recentWarnings.clear();
+-                    Bukkit.getConsoleSender().sendMessage(warnText.toString());
+-                    for (Player player : Bukkit.getOnlinePlayers()) {
+-                        if (player.isOp()) {
+-                            player.sendMessage(warnText.toString());
+-                        }
+-                    }
+-                }
+-            }
+-        }.runTaskTimer(this, 100, 20 * 60 * 5);
+         Bukkit.getPluginManager().registerEvents(new WorldListChangeTracker(), this);
+     }
+ 
+@@ -576,6 +_,9 @@
+                 return false;
+             }
+             if (args.length >= 2 && CoreUtilities.equalsIgnoreCase(args[0], "chat")) {
++                if (ChatTrigger.instance == null) {
++                    return false;
++                }
+                 ChatTrigger.instance.chatTriggerInternal(new PlayerChatEvent((Player) sender, Arrays.stream(args).skip(1).collect(Collectors.joining(" "))));
+                 return true;
+             }

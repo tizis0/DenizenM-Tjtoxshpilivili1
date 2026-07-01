@@ -1,0 +1,10 @@
+--- a/plugin.yml
++++ b/plugin.yml
+@@ -1,6 +_,6 @@
+ name: Denizen
+ authors: ['The DenizenScript Team']
+-version: ${project.version} (build ${BUILD_NUMBER}-${BUILD_CLASS})
++version: @denizenVersion@ (build @buildNumber@-@buildClass@)
+ main: com.denizenscript.denizen.Denizen
+ softdepend: [Citizens, Vault]
+ 

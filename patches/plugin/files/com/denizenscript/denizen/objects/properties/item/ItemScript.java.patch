@@ -1,0 +1,35 @@
+--- a/com/denizenscript/denizen/objects/properties/item/ItemScript.java
++++ b/com/denizenscript/denizen/objects/properties/item/ItemScript.java
+@@ -28,7 +_,7 @@
+     }
+ 
+     public static final String[] handledTags = new String[] {
+-            "has_script", "scriptname", "script"
++            "has_script", "script"
+     };
+ 
+     public static final String[] handledMechs = new String[] {
+@@ -52,23 +_,6 @@
+             BukkitImplDeprecations.hasScriptTags.warn(attribute.context);
+             return new ElementTag(item.isItemscript())
+                     .getObjectAttribute(attribute.fulfill(1));
+-        }
+-
+-        // <--[tag]
+-        // @attribute <ItemTag.scriptname>
+-        // @returns ElementTag
+-        // @deprecated use ".script.name" instead.
+-        // @group data
+-        // @description
+-        // Use ".script.name" instead.
+-        // This deprecated tag may be useful for debugging items when item scripts may have been deleted.
+-        // -->
+-        if (attribute.startsWith("scriptname")) {
+-            BukkitImplDeprecations.hasScriptTags.warn(attribute.context);
+-            if (item.isItemscript()) {
+-                return new ElementTag(item.getScriptName())
+-                        .getObjectAttribute(attribute.fulfill(1));
+-            }
+         }
+ 
+         // <--[tag]

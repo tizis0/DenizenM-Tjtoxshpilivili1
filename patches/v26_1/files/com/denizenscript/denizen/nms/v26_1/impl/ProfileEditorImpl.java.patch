@@ -1,0 +1,28 @@
+--- a/com/denizenscript/denizen/nms/v26_1/impl/ProfileEditorImpl.java
++++ b/com/denizenscript/denizen/nms/v26_1/impl/ProfileEditorImpl.java
+@@ -8,7 +_,7 @@
+ import com.denizenscript.denizen.nms.v26_1.helpers.PacketHelperImpl;
+ import com.denizenscript.denizen.nms.v26_1.impl.network.handlers.DenizenNetworkManagerImpl;
+ import com.denizenscript.denizen.scripts.commands.entity.RenameCommand;
+-import com.denizenscript.denizen.utilities.FormattedTextHelper;
++import com.denizenscript.denizen.utilities.PaperAPITools;
+ import com.denizenscript.denizencore.utilities.ReflectionHelper;
+ import com.denizenscript.denizencore.utilities.debugging.Debug;
+ import com.google.common.collect.ImmutableMultimap;
+@@ -16,7 +_,6 @@
+ import com.mojang.authlib.properties.Property;
+ import com.mojang.authlib.properties.PropertyMap;
+ import com.mojang.datafixers.util.Either;
+-import net.md_5.bungee.api.ChatColor;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+@@ -100,7 +_,7 @@
+             }
+             GameProfile modifiedProfile = new GameProfile(baseProfile.id(), rename != null ? (rename.length() > 16 ? rename.substring(0, 16) : rename) : baseProfile.name(), modifiedProperties);
+             String listRename = RenameCommand.getCustomNameFor(entry.profileId(), networkManager.player.getBukkitEntity(), true);
+-            Component displayName = listRename != null ? Handler.componentToNMS(FormattedTextHelper.parse(listRename, ChatColor.WHITE)) : entry.displayName();
++            Component displayName = listRename != null ? Handler.parseNMSComponent(listRename, PaperAPITools.BaseColor.WHITE) : entry.displayName();
+             ClientboundPlayerInfoUpdatePacket.Entry modifiedEntry = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profileId(), modifiedProfile, entry.listed(), entry.latency(), entry.gameMode(), displayName, entry.showHat(), entry.listOrder(), entry.chatSession());
+             modifiedEntries.add(modifiedEntry);
+         }

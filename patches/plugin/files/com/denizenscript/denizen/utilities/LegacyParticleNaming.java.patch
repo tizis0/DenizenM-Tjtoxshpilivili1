@@ -1,0 +1,30 @@
+--- a/com/denizenscript/denizen/utilities/LegacyParticleNaming.java
++++ b/com/denizenscript/denizen/utilities/LegacyParticleNaming.java
+@@ -1,8 +_,5 @@
+ package com.denizenscript.denizen.utilities;
+ 
+-
+-import com.denizenscript.denizen.nms.NMSHandler;
+-import com.denizenscript.denizen.nms.NMSVersion;
+ import org.bukkit.Particle;
+ 
+ import java.util.HashMap;
+@@ -15,7 +_,7 @@
+     public static void registerLegacyName(String name, String particle) {
+         legacyParticleNames.put(name, Particle.valueOf(particle));
+     }
+-    
++
+     static {
+         registerLegacyName("SMOKE", "SMOKE_NORMAL");
+         registerLegacyName("HUGE_EXPLOSION", "EXPLOSION_HUGE");
+@@ -26,9 +_,6 @@
+         registerLegacyName("CRIT", "CRIT");
+         registerLegacyName("MAGIC_CRIT", "CRIT_MAGIC");
+         registerLegacyName("MOB_SPELL", "SPELL_MOB");
+-        if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_19)) {
+-            registerLegacyName("MOB_SPELL_AMBIENT", "SPELL_MOB_AMBIENT");
+-        }
+         registerLegacyName("INSTANT_SPELL", "SPELL_INSTANT");
+         registerLegacyName("WITCH_MAGIC", "SPELL_WITCH");
+         registerLegacyName("EXPLODE", "EXPLOSION_NORMAL");

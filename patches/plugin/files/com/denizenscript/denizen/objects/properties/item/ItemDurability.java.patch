@@ -1,0 +1,12 @@
+--- a/com/denizenscript/denizen/objects/properties/item/ItemDurability.java
++++ b/com/denizenscript/denizen/objects/properties/item/ItemDurability.java
+@@ -6,7 +_,9 @@
+ import com.denizenscript.denizencore.objects.ObjectTag;
+ import com.denizenscript.denizencore.objects.properties.Property;
+ import com.denizenscript.denizencore.tags.Attribute;
++import org.bukkit.inventory.ItemStack;
+ import org.bukkit.inventory.meta.Damageable;
++import org.bukkit.inventory.meta.ItemMeta;
+ 
+ public class ItemDurability implements Property {
+ 

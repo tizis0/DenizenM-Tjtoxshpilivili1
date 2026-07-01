@@ -1,0 +1,103 @@
+--- a/com/denizenscript/denizen/nms/v1_21/helpers/ItemHelperImpl.java
++++ b/com/denizenscript/denizen/nms/v1_21/helpers/ItemHelperImpl.java
+@@ -9,7 +_,6 @@
+ import com.denizenscript.denizen.objects.ItemTag;
+ import com.denizenscript.denizen.objects.properties.item.ItemComponentsPatch;
+ import com.denizenscript.denizen.objects.properties.item.ItemRawNBT;
+-import com.denizenscript.denizen.utilities.FormattedTextHelper;
+ import com.denizenscript.denizen.utilities.PaperAPITools;
+ import com.denizenscript.denizencore.objects.core.ElementTag;
+ import com.denizenscript.denizencore.objects.core.MapTag;
+@@ -17,14 +_,11 @@
+ import com.denizenscript.denizencore.utilities.ReflectionHelper;
+ import com.denizenscript.denizencore.utilities.debugging.Debug;
+ import com.google.common.collect.*;
+-import com.google.gson.JsonObject;
+ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.properties.Property;
+ import com.mojang.serialization.Dynamic;
+-import com.mojang.serialization.JsonOps;
+ import net.kyori.adventure.nbt.BinaryTag;
+ import net.kyori.adventure.nbt.CompoundBinaryTag;
+-import net.md_5.bungee.api.ChatColor;
+ import net.minecraft.advancements.criterion.BlockPredicate;
+ import net.minecraft.advancements.criterion.DataComponentMatchers;
+ import net.minecraft.core.*;
+@@ -241,7 +_,7 @@
+     @Override
+     public void registerSmithingRecipe(String keyName, ItemStack result, ItemStack[] baseItem, boolean baseExact, ItemStack[] upgradeItem, boolean upgradeExact, ItemStack[] templateItem, boolean templateExact) {
+         ResourceKey<Recipe<?>> key = createRecipeKey(keyName);
+-        Ingredient templateItemRecipe = templateItem.length == 0 ? null : itemArrayToRecipe(templateItem, templateExact);
++        Ingredient templateItemRecipe = itemArrayToRecipe(templateItem, templateExact);
+         Ingredient baseItemRecipe = itemArrayToRecipe(baseItem, baseExact);
+         Ingredient upgradeItemRecipe = itemArrayToRecipe(upgradeItem, upgradeExact);
+         net.minecraft.world.item.ItemStack nmsCopy = CraftItemStack.asNMSCopy(result);
+@@ -317,26 +_,13 @@
+     }
+ 
+     @Override
+-    public JsonObject getRawHoverComponentsJson(ItemStack item) {
+-        DataComponentPatch nmsComponents = CraftItemStack.asNMSCopy(item).getComponentsPatch();
+-        if (nmsComponents.isEmpty()) {
+-            return null;
++    public ItemStack createItemWithNMSComponents(Material type, int count, Object nmsPatchObject) {
++        if (!(nmsPatchObject instanceof DataComponentPatch nmsPatch)) {
++            throw new IllegalArgumentException(nmsPatchObject + " is not a DataComponentPatch");
+         }
+-        return DataComponentPatch.CODEC.encodeStart(CraftRegistry.getMinecraftRegistry().createSerializationContext(JsonOps.INSTANCE), nmsComponents).getOrThrow().getAsJsonObject();
+-    }
+-
+-    @Override
+-    public ItemStack applyRawHoverComponentsJson(ItemStack item, JsonObject components) {
+-        return DataComponentPatch.CODEC.parse(CraftRegistry.getMinecraftRegistry().createSerializationContext(JsonOps.INSTANCE), components).mapOrElse(
+-                nmsComponents -> {
+-                    net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+-                    nmsItem.applyComponents(nmsComponents);
+-                    return CraftItemStack.asCraftMirror(nmsItem);
+-                },
+-                error -> {
+-                    Debug.echoError("Invalid hover item data '" + components + "': " + error.message());
+-                    return item;
+-                });
++        return CraftItemStack.asCraftMirror(new net.minecraft.world.item.ItemStack(
++                BuiltInRegistries.ITEM.wrapAsHolder(CraftItemType.bukkitToMinecraft(type)), count, nmsPatch
++        ));
+     }
+ 
+     @Override
+@@ -564,7 +_,7 @@
+         }
+         net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(item.getItemStack());
+         Component nmsDisplayName = nmsItemStack.get(DataComponents.CUSTOM_NAME);
+-        return FormattedTextHelper.stringify(Handler.componentToSpigot(nmsDisplayName));
++        return Handler.stringifyNMSComponent(nmsDisplayName);
+     }
+ 
+     @Override
+@@ -576,7 +_,7 @@
+         ItemLore nmsLore = nmsItemStack.get(DataComponents.LORE);
+         List<String> outList = new ArrayList<>(nmsLore.lines().size());
+         for (Component nmsLoreLine : nmsLore.lines()) {
+-            outList.add(FormattedTextHelper.stringify(Handler.componentToSpigot(nmsLoreLine)));
++            outList.add(Handler.stringifyNMSComponent(nmsLoreLine));
+         }
+         return outList;
+     }
+@@ -588,7 +_,7 @@
+             nmsItemStack.remove(DataComponents.CUSTOM_NAME);
+         }
+         else {
+-            nmsItemStack.set(DataComponents.CUSTOM_NAME, Handler.componentToNMS(FormattedTextHelper.parse(name, ChatColor.WHITE)));
++            nmsItemStack.set(DataComponents.CUSTOM_NAME, Handler.parseNMSComponent(name, PaperAPITools.BaseColor.WHITE));
+         }
+         item.setItemStack(CraftItemStack.asBukkitCopy(nmsItemStack));
+     }
+@@ -602,7 +_,7 @@
+         else {
+             List<Component> nmsLore = new ArrayList<>(lore.size());
+             for (String loreLine : lore) {
+-                nmsLore.add(Handler.componentToNMS(FormattedTextHelper.parse(loreLine, ChatColor.WHITE)));
++                nmsLore.add(Handler.parseNMSComponent(loreLine, PaperAPITools.BaseColor.WHITE));
+             }
+             nmsItemStack.set(DataComponents.LORE, new ItemLore(nmsLore));
+         }

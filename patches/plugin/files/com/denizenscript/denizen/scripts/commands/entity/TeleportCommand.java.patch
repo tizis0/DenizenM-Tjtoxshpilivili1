@@ -1,0 +1,81 @@
+--- a/com/denizenscript/denizen/scripts/commands/entity/TeleportCommand.java
++++ b/com/denizenscript/denizen/scripts/commands/entity/TeleportCommand.java
+@@ -15,6 +_,7 @@
+ import com.denizenscript.denizencore.objects.core.ListTag;
+ import com.denizenscript.denizencore.scripts.ScriptEntry;
+ import com.denizenscript.denizencore.scripts.commands.AbstractCommand;
++import com.denizenscript.denizencore.scripts.commands.Holdable;
+ import com.denizenscript.denizencore.scripts.commands.generator.*;
+ import com.denizenscript.denizencore.utilities.Deprecations;
+ import com.denizenscript.denizencore.utilities.debugging.Debug;
+@@ -26,11 +_,11 @@
+ import java.util.Arrays;
+ import java.util.List;
+ 
+-public class TeleportCommand extends AbstractCommand {
++public class TeleportCommand extends AbstractCommand implements Holdable {
+ 
+     public TeleportCommand() {
+         setName("teleport");
+-        setSyntax("teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch)");
++        setSyntax("teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch) (async)");
+         setRequiredArguments(1, 9);
+         isProcedural = false;
+         autoCompile();
+@@ -38,7 +_,7 @@
+ 
+     // <--[command]
+     // @Name Teleport
+-    // @Syntax teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch)
++    // @Syntax teleport (<entity>|...) [<location>] (cause:<cause>) (entity_options:<option>|...) (relative) (relative_axes:<axis>|...) (offthread_repeat:<#>) (offthread_yaw) (offthread_pitch) (async)
+     // @Required 1
+     // @Maximum 9
+     // @Short Teleports the entity(s) to a new location.
+@@ -58,6 +_,9 @@
+     // Optionally, you may use "offthread_repeat:" with the relative arg when teleporting a player to smooth out the teleport with a specified number of extra async packets sent within a single tick.
+     // Optionally, specify "offthread_yaw" or "offthread_pitch" while using offthread_repeat to smooth the player's yaw/pitch to the new location's yaw/pitch.
+     //
++    // Optionally, specify "async" to use asynchronous teleportation (Paper only). This is useful for cross-world teleports to avoid blocking the main thread.
++    // The 'async' argument is ~waitable. Refer to <@link language ~waitable>.
++    //
+     // Optionally, specify additional teleport options using the 'entity_options:' arguments (Paper only).
+     // This allows things like retaining an open inventory when teleporting - see the links below for more information.
+     // See <@link url https://jd.papermc.io/paper/1.19/io/papermc/paper/entity/TeleportFlag.EntityState.html> for all possible options.
+@@ -111,6 +_,7 @@
+                                    @ArgPrefixed @ArgName("cause") @ArgDefaultText("plugin") PlayerTeleportEvent.TeleportCause cause,
+                                    @ArgName("entity_options") @ArgPrefixed @ArgDefaultNull @ArgSubType(EntityState.class) List<EntityState> entityOptions,
+                                    @ArgName("relative_axes") @ArgPrefixed @ArgDefaultNull @ArgSubType(Relative.class) List<Relative> relativeAxes,
++                                   @ArgName("async") boolean async,
+                                    @ArgName("relative") boolean relative,
+                                    @ArgName("offthread_repeat") @ArgDefaultNull @ArgPrefixed ElementTag offthreadRepeats,
+                                    @ArgName("offthread_yaw") boolean offthreadYaw,
+@@ -133,6 +_,7 @@
+         if (location == null || entities == null) {
+             throw new InvalidArgumentsRuntimeException("Location or entity list missing or invalid for Teleport command");
+         }
++        int[] asyncCounter = new int[1];
+         for (ObjectTag entityObj : entities.objectForms) {
+             if (entityObj.shouldBeType(PlayerTag.class)) {
+                 PlayerTag player = entityObj.asType(PlayerTag.class, scriptEntry.context);
+@@ -198,6 +_,21 @@
+                         Debug.echoError(ex);
+                     }
+                 });
++                continue;
++            }
++            if (async) {
++                if (scriptEntry.shouldWaitFor()) {
++                    asyncCounter[0]++;
++                    PaperAPITools.instance.teleportAsync(entity.getBukkitEntity(), location, cause, entityOptions, relativeAxes, success -> {
++                        asyncCounter[0]--;
++                        if (asyncCounter[0] <= 0) {
++                            scriptEntry.setFinished(true);
++                        }
++                    });
++                }
++                else {
++                    PaperAPITools.instance.teleportAsync(entity.getBukkitEntity(), location, cause, entityOptions, relativeAxes);
++                }
+                 continue;
+             }
+             if (entityOptions != null || relativeAxes != null) {

@@ -1,0 +1,21 @@
+--- a/com/denizenscript/denizen/utilities/Utilities.java
++++ b/com/denizenscript/denizen/utilities/Utilities.java
+@@ -567,7 +_,7 @@
+     }
+ 
+     public static ListTag listLegacyTypes(Class<? extends Keyed> type) {
+-        List<?> types = NMSHandler.getVersion().isAtLeast(NMSVersion.v1_21) ? Bukkit.getRegistry(type).stream().toList() : Arrays.asList(type.getEnumConstants());
++        List<?> types = Bukkit.getRegistry(type).stream().toList();
+         return new ListTag(types, Utilities::enumLikeToLegacyElement);
+     }
+ 
+@@ -596,9 +_,6 @@
+     }
+ 
+     public static <T> T elementToEnumlike(ElementTag element, Class<T> type, boolean showWarning) {
+-        if (NMSHandler.getVersion().isAtMost(NMSVersion.v1_20)) {
+-            return element.asEnum(type);
+-        }
+         Registry<?> registry = Bukkit.getRegistry((Class<? extends Keyed>) type);
+         if (registry == null) {
+             return element.asEnum(type);

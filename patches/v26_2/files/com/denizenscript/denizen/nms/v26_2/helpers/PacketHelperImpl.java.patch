@@ -1,0 +1,61 @@
+--- a/com/denizenscript/denizen/nms/v26_2/helpers/PacketHelperImpl.java
++++ b/com/denizenscript/denizen/nms/v26_2/helpers/PacketHelperImpl.java
+@@ -7,7 +_,7 @@
+ import com.denizenscript.denizen.nms.v26_2.impl.network.handlers.DenizenNetworkManagerImpl;
+ import com.denizenscript.denizen.objects.LocationTag;
+ import com.denizenscript.denizen.scripts.commands.entity.TeleportCommand;
+-import com.denizenscript.denizen.utilities.FormattedTextHelper;
++import com.denizenscript.denizen.utilities.PaperAPITools;
+ import com.denizenscript.denizen.utilities.Utilities;
+ import com.denizenscript.denizen.utilities.maps.MapImage;
+ import com.denizenscript.denizen.utilities.packets.NetworkInterceptHelper;
+@@ -15,7 +_,6 @@
+ import com.denizenscript.denizencore.utilities.CoreUtilities;
+ import com.denizenscript.denizencore.utilities.ReflectionHelper;
+ import com.denizenscript.denizencore.utilities.debugging.Debug;
+-import net.md_5.bungee.api.ChatColor;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.protocol.Packet;
+@@ -32,9 +_,9 @@
+ import net.minecraft.world.entity.Relative;
+ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+ import net.minecraft.world.entity.ai.attributes.Attributes;
++import net.minecraft.world.entity.monster.spider.CaveSpider;
+ import net.minecraft.world.entity.monster.Creeper;
+ import net.minecraft.world.entity.monster.EnderMan;
+-import net.minecraft.world.entity.monster.spider.CaveSpider;
+ import net.minecraft.world.entity.monster.spider.Spider;
+ import net.minecraft.world.inventory.AbstractContainerMenu;
+ import net.minecraft.world.level.block.Block;
+@@ -151,8 +_,8 @@
+ 
+     @Override
+     public void showTabListHeaderFooter(Player player, String header, String footer) {
+-        Component cHeader = Handler.componentToNMS(FormattedTextHelper.parse(header, ChatColor.WHITE));
+-        Component cFooter = Handler.componentToNMS(FormattedTextHelper.parse(footer, ChatColor.WHITE));
++        Component cHeader = Handler.parseNMSComponent(header, PaperAPITools.BaseColor.WHITE);
++        Component cFooter = Handler.parseNMSComponent(footer, PaperAPITools.BaseColor.WHITE);
+         send(player, new ClientboundTabListPacket(cHeader, cFooter));
+     }
+ 
+@@ -160,8 +_,8 @@
+     public void showTitle(Player player, String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
+         send(player, new ClientboundBundlePacket(List.of(
+                 new ClientboundSetTitlesAnimationPacket(fadeInTicks, stayTicks, fadeOutTicks),
+-                new ClientboundSetTitleTextPacket(Handler.componentToNMS(FormattedTextHelper.parse(title, ChatColor.WHITE))),
+-                new ClientboundSetSubtitleTextPacket(Handler.componentToNMS(FormattedTextHelper.parse(subtitle, ChatColor.WHITE)))
++                new ClientboundSetTitleTextPacket(Handler.parseNMSComponent(title, PaperAPITools.BaseColor.WHITE)),
++                new ClientboundSetSubtitleTextPacket(Handler.parseNMSComponent(subtitle, PaperAPITools.BaseColor.WHITE))
+         )));
+     }
+ 
+@@ -242,7 +_,7 @@
+                 return;
+             }
+             List<SynchedEntityData.DataValue<?>> list = List.of(
+-                    createEntityData(ENTITY_DATA_ACCESSOR_CUSTOM_NAME, Optional.of(Handler.componentToNMS(FormattedTextHelper.parse(name, ChatColor.WHITE)))),
++                    createEntityData(ENTITY_DATA_ACCESSOR_CUSTOM_NAME, Optional.of(Handler.parseNMSComponent(name, PaperAPITools.BaseColor.WHITE))),
+                     createEntityData(ENTITY_DATA_ACCESSOR_CUSTOM_NAME_VISIBLE, true)
+             );
+             send(player, new ClientboundSetEntityDataPacket(entity.getEntityId(), list));

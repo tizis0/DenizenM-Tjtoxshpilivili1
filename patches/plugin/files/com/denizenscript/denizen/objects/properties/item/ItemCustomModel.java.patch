@@ -1,0 +1,26 @@
+--- a/com/denizenscript/denizen/objects/properties/item/ItemCustomModel.java
++++ b/com/denizenscript/denizen/objects/properties/item/ItemCustomModel.java
+@@ -15,7 +_,6 @@
+     // @description
+     // Controls the custom model data ID number of the item.
+     // Use with no input to remove the custom model data.
+-    // Prefer <@link property ItemTag.item_model> on MC 1.21+.
+     // See also <@link tag ItemTag.has_custom_model_data>
+     // -->
+     public static boolean describes(ItemTag item) {
+@@ -48,7 +_,6 @@
+     }
+ 
+     public static void register() {
+-        autoRegisterNullable("custom_model_data", ItemCustomModel.class, ElementTag.class, false);
+ 
+         // <--[tag]
+         // @attribute <ItemTag.has_custom_model_data>
+@@ -57,7 +_,6 @@
+         // @group properties
+         // @description
+         // Returns whether the item has a custom model data ID number set on it.
+-        // Prefer <@link property ItemTag.item_model> on MC 1.21+.
+         // See also <@link tag ItemTag.custom_model_data>.
+         // -->
+         PropertyParser.registerTag(ItemCustomModel.class, ElementTag.class, "has_custom_model_data", (attribute, prop) -> {

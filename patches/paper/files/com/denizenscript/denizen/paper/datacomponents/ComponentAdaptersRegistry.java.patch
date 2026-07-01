@@ -1,0 +1,19 @@
+--- a/com/denizenscript/denizen/paper/datacomponents/ComponentAdaptersRegistry.java
++++ b/com/denizenscript/denizen/paper/datacomponents/ComponentAdaptersRegistry.java
+@@ -1,5 +_,8 @@
+ package com.denizenscript.denizen.paper.datacomponents;
+ 
++import com.denizen.m.datacomponents.CustomModelDataAdapter;
++import com.denizen.m.datacomponents.RarityColorAdapter;
++
+ public class ComponentAdaptersRegistry {
+ 
+     public static void register() {
+@@ -9,5 +_,7 @@
+         DataComponentAdapter.register(new MaxDurabilityAdapter());
+         DataComponentAdapter.register(new MaxStackSizeAdapter());
+         DataComponentAdapter.register(new RarityAdapter());
++        DataComponentAdapter.register(new RarityColorAdapter());
++        DataComponentAdapter.register(new CustomModelDataAdapter());
+     }
+ }

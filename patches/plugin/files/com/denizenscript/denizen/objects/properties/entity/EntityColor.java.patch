@@ -1,0 +1,15 @@
+--- a/com/denizenscript/denizen/objects/properties/entity/EntityColor.java
++++ b/com/denizenscript/denizen/objects/properties/entity/EntityColor.java
+@@ -258,11 +_,7 @@
+             case FOX -> as(Fox.class).getFoxType().name();
+             case CAT -> {
+                 Cat cat = as(Cat.class);
+-                // TODO once 1.21 is the minimum supported version, replace with direct registry-based handling
+-                if (NMSHandler.getVersion().isAtLeast(NMSVersion.v1_21)) {
+-                    yield Utilities.namespacedKeyToString(cat.getCatType().getKey()) + "|" + cat.getCollarColor().name();
+-                }
+-                yield cat.getCatType() + "|" + cat.getCollarColor().name();
++                yield Utilities.namespacedKeyToString(cat.getCatType().getKey()) + "|" + cat.getCollarColor().name();
+             }
+             case PANDA -> {
+                 Panda panda = as(Panda.class);

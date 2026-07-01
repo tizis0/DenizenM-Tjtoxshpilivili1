@@ -1,0 +1,58 @@
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+.kotlin
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Denizen-Core patches ###
+/Denizen-Core/*
+/Denizen-Core/.git
+!/Denizen-Core/src/
+!/Denizen-Core/build.gradle.kts
+/Denizen-Core/src/**
+
+### Denizen patches ###
+/Denizen/**/.git
+
+/Denizen/dist/src/denizen
+/Denizen/dist/.git
+!/Denizen/dist/build.gradle.kts
+
+/Denizen/paper/src/denizen
+/Denizen/paper/.git
+!/Denizen/paper/build.gradle.kts
+
+/Denizen/plugin/src/denizen
+/Denizen/plugin/.git
+!/Denizen/plugin/build.gradle.kts
+
+/Denizen/v1_21/src/denizen
+/Denizen/v1_21/.git
+!/Denizen/v1_21/build.gradle.kts
+
+/Denizen/v26_1/src/denizen
+/Denizen/v26_1/.git
+!/Denizen/v26_1/build.gradle.kts
+
+/Denizen/v26_2/src/denizen
+/Denizen/v26_2/.git
+!/Denizen/v26_2/build.gradle.kts

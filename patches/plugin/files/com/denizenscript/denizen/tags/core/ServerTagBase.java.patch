@@ -1,0 +1,45 @@
+--- a/com/denizenscript/denizen/tags/core/ServerTagBase.java
++++ b/com/denizenscript/denizen/tags/core/ServerTagBase.java
+@@ -1121,16 +_,6 @@
+         });
+ 
+         // <--[tag]
+-        // @attribute <server.bukkit_name>
+-        // @returns ElementTag
+-        // @description
+-        // Returns the name of the Bukkit platform, such as "Paper".
+-        // -->
+-        tagProcessor.registerStaticTag(ElementTag.class, "bukkit_name", (attribute, object) -> {
+-            return new ElementTag(Bukkit.getName());
+-        });
+-
+-        // <--[tag]
+         // @attribute <server.bukkit_version>
+         // @returns ElementTag
+         // @description
+@@ -1674,6 +_,16 @@
+         });
+ 
+         // <--[tag]
++        // @attribute <server.bukkit_name>
++        // @returns ElementTag
++        // @description
++        // Returns the name of the Bukkit platform, such as "Paper".
++        // -->
++        tagProcessor.registerStaticTag(ElementTag.class, "bukkit_name", (attribute, object) -> {
++            return new ElementTag(Bukkit.getName());
++        });
++
++        // <--[tag]
+         // @attribute <server.port>
+         // @returns ElementTag(Number)
+         // @description
+@@ -1832,7 +_,7 @@
+             }
+             if (killer != null) {
+                 if (killer.getLivingEntity() instanceof HumanEntity humanEntity) {
+-                     context = context.killer(humanEntity);
++                    context = context.killer(humanEntity);
+                 }
+                 else {
+                     attribute.echoError("Invalid killer '" + killer + "' specified: must be an online player or a player-type NPC.");

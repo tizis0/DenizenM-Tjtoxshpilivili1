@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen-Core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/dist/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/paper/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/paper/src/main/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/plugin/src/denizen" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/plugin/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/plugin/src/denizen/resources" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/plugin/src/main/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v1_21/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v1_21/src/main/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v26_1/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v26_1/src/main/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v26_2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v26_2/src/denizen/java" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Denizen/v26_2/src/main/java" vcs="Git" />
+  </component>
+</project>

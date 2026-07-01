@@ -1,0 +1,68 @@
+--- a/com/denizenscript/denizen/objects/PlayerTag.java
++++ b/com/denizenscript/denizen/objects/PlayerTag.java
+@@ -3808,6 +_,32 @@
+ 
+         // <--[mechanism]
+         // @object PlayerTag
++        // @name edit_sign
++        // @input LocationTag
++        // @description
++        // Allows the player to edit an existing sign. To create a sign, see <@link command Sign>.
++        // Give no input to make a fake edit interface.
++        // -->
++        if (mechanism.matches("edit_sign")) {
++            if (mechanism.hasValue() && mechanism.requireObject(LocationTag.class)) {
++                BlockState state = mechanism.valueAsType(LocationTag.class).getBlockState();
++                if (!(state instanceof Sign)) {
++                    mechanism.echoError("Invalid location specified: must be a sign.");
++                    return;
++                }
++                if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
++                    NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), state.getLocation());
++                    return;
++                }
++                getPlayerEntity().openSign((Sign) state);
++            }
++            else {
++                NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), null);
++            }
++        }
++
++        // <--[mechanism]
++        // @object PlayerTag
+         // @name quietly_discover_recipe
+         // @input ListTag
+         // @description
+@@ -3850,32 +_,6 @@
+                 keys.add(Utilities.parseNamespacedKey(key));
+             }
+             getPlayerEntity().undiscoverRecipes(keys);
+-        }
+-
+-        // <--[mechanism]
+-        // @object PlayerTag
+-        // @name edit_sign
+-        // @input LocationTag
+-        // @description
+-        // Allows the player to edit an existing sign. To create a sign, see <@link command Sign>.
+-        // Give no input to make a fake edit interface.
+-        // -->
+-        if (mechanism.matches("edit_sign")) {
+-            if (mechanism.hasValue() && mechanism.requireObject(LocationTag.class)) {
+-                BlockState state = mechanism.valueAsType(LocationTag.class).getBlockState();
+-                if (!(state instanceof Sign)) {
+-                    mechanism.echoError("Invalid location specified: must be a sign.");
+-                    return;
+-                }
+-                if (!NMSHandler.getVersion().isAtLeast(NMSVersion.v1_18)) {
+-                    NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), state.getLocation());
+-                    return;
+-                }
+-                getPlayerEntity().openSign((Sign) state);
+-            }
+-            else {
+-                NMSHandler.packetHelper.showSignEditor(getPlayerEntity(), null);
+-            }
+         }
+ 
+         // <--[mechanism]
